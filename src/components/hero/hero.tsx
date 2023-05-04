@@ -1,8 +1,8 @@
-import { Container, Flex, FlexProps, Text, VStack } from '@chakra-ui/react'
+import { Container, Flex, FlexProps, Text, VStack } from "@chakra-ui/react";
 
-interface HeroProps extends Omit<FlexProps, 'title'> {
-  title: string | React.ReactNode
-  description?: string | React.ReactNode
+interface HeroProps extends Omit<FlexProps, "title"> {
+  title: string | React.ReactNode;
+  description?: string | React.ReactNode;
 }
 
 export const Hero = ({ title, description, children, ...rest }: HeroProps) => {
@@ -18,7 +18,7 @@ export const Hero = ({ title, description, children, ...rest }: HeroProps) => {
             textStyle="subtitle"
             align="left"
             color="gray.500"
-            _dark={{ color: 'gray.400' }}
+            _dark={{ color: "gray.400" }}
           >
             {description}
           </Text>
@@ -26,5 +26,5 @@ export const Hero = ({ title, description, children, ...rest }: HeroProps) => {
         {children}
       </Container>
     </Flex>
-  )
-}
+  );
+};
