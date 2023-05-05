@@ -1,5 +1,4 @@
 "use client";
-
 import { SaasProvider } from "@saas-ui/react";
 import { FC } from "react";
 import theme from "src/theme";
