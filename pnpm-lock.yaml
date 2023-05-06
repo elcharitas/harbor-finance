@@ -7,6 +7,7 @@ specifiers:
   '@emotion/react': ^11
   '@emotion/styled': ^11
   '@fontsource/inter': ^4.5.15
+  '@fontsource/lato': ^4.5.10
   '@rainbow-me/rainbowkit': 0.12.13
   '@saas-ui/auth': ^1.7.6
   '@saas-ui/react': 2.0.0-next.20
@@ -35,6 +36,7 @@ dependencies:
   '@emotion/react': 11.11.0_s3k22s5ab4eu26xuel7hiaraxy
   '@emotion/styled': 11.11.0_gwsnvbfty4jua3m4tf74x4grui
   '@fontsource/inter': 4.5.15
+  '@fontsource/lato': 4.5.10
   '@rainbow-me/rainbowkit': 0.12.13_4knbbdiscsmdccrqfpfu3ju54y
   '@saas-ui/auth': 1.7.6_vykxnk4maz76wjp2ymwz7b7qni
   '@saas-ui/react': 2.0.0-next.20_4wo5dyapjmh6b3xnidzqy5s5rm
@@ -1787,6 +1789,10 @@ packages:
 
   /@fontsource/inter/4.5.15:
     resolution: {integrity: sha512-FzleM9AxZQK2nqsTDtBiY0PMEVWvnKnuu2i09+p6DHvrHsuucoV2j0tmw+kAT3L4hvsLdAIDv6MdGehsPIdT+Q==}
+    dev: false
+
+  /@fontsource/lato/4.5.10:
+    resolution: {integrity: sha512-2hYR6r661Cq9B8zugtu6yxuOKqrVhAgfOSaPSq8XoxbC4ebsl0KOTy/vPoP+9U7JuQVLfrmikirW4a9Z0nDUug==}
     dev: false
 
   /@hookform/resolvers/2.9.11_react-hook-form@7.43.9:

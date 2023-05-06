@@ -7,10 +7,10 @@ export interface LogoProps {
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export const Logo = ({ href = "/", onClick }: LogoProps) => {
+export const Logo: React.FC<LogoProps> = ({ href = "/", onClick }) => {
   const logo = (
     <Heading as="h1" size="md">
-      Harbour
+      Harbour Finance
     </Heading>
   );
 
@@ -24,7 +24,7 @@ export const Logo = ({ href = "/", onClick }: LogoProps) => {
         onClick={onClick}
       >
         {logo}
-        <VisuallyHidden>Harbour</VisuallyHidden>
+        <VisuallyHidden>Harbour Finance</VisuallyHidden>
       </Link>
     </Flex>
   );

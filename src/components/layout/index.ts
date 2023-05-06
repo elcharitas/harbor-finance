@@ -1,1 +1,2 @@
-export * from './layout'
+"use client";
+export * from "./layout";

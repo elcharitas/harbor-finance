@@ -15,8 +15,7 @@ export interface FooterProps extends BoxProps {
   columns?: number;
 }
 
-export const Footer: React.FC<FooterProps> = (props) => {
-  const { columns = 2, ...rest } = props;
+export const Footer: React.FC<FooterProps> = ({ columns = 2, ...rest }) => {
   return (
     <Box bg="white" _dark={{ bg: "gray.900" }} {...rest}>
       <Container maxW="container.2xl" px="8" py="8">
@@ -28,7 +27,7 @@ export const Footer: React.FC<FooterProps> = (props) => {
                 Simple savings
               </Text>
             </Stack>
-            <Copyright>Harbour</Copyright>
+            <Copyright>Harbour Finance</Copyright>
           </Stack>
           <HStack justify="flex-end" spacing="4" alignSelf="flex-end">
             {[{ href: "", label: "" }].map(({ href, label }) => (
@@ -48,10 +47,7 @@ export interface CopyrightProps {
   children: React.ReactNode;
 }
 
-export const Copyright: React.FC<CopyrightProps> = ({
-  title,
-  children,
-}: CopyrightProps) => {
+export const Copyright: React.FC<CopyrightProps> = ({ title, children }) => {
   let content;
   if (title && !children) {
     content = `&copy; ${new Date().getFullYear()} - ${title}`;
@@ -63,8 +59,7 @@ export const Copyright: React.FC<CopyrightProps> = ({
   );
 };
 
-export const FooterLink: React.FC<LinkProps> = (props) => {
-  const { children, ...rest } = props;
+export const FooterLink: React.FC<LinkProps> = ({ children, ...rest }) => {
   return (
     <Link
       color="muted"

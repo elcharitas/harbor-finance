@@ -15,6 +15,7 @@
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@fontsource/inter": "^4.5.15",
+    "@fontsource/lato": "^4.5.10",
     "@rainbow-me/rainbowkit": "0.12.13",
     "@saas-ui/auth": "^1.7.6",
     "@saas-ui/react": "2.0.0-next.20",
