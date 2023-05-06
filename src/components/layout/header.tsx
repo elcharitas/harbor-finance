@@ -7,7 +7,7 @@ import {
   Flex,
   useColorModeValue,
 } from "@chakra-ui/react";
-// import Navigation from './navigation'
+import Navigation from "./navigation";
 import { Logo } from "./logo";
 import { useScroll } from "framer-motion";
 
@@ -23,7 +23,7 @@ export const Header = (props: HeaderProps) => {
     return scrollY.onChange(() => setY(scrollY.get()));
   }, [scrollY]);
 
-  const bg = useColorModeValue("whiteAlpha.700", "rgba(29, 32, 37, 0.7)");
+  const bg = useColorModeValue("whiteAlpha.700", "blackAlpha.50");
 
   return (
     <Box
@@ -32,31 +32,18 @@ export const Header = (props: HeaderProps) => {
       top="0"
       w="full"
       position="fixed"
-      backdropFilter="blur(5px)"
       zIndex="sticky"
       borderColor="whiteAlpha.100"
       transitionProperty="common"
       transitionDuration="normal"
       bg={y > height ? bg : ""}
       boxShadow={y > height ? "md" : ""}
-      borderBottomWidth={y > height ? "1px" : ""}
       {...props}
     >
       <Container maxW="container.2xl" px="8" py="4">
         <Flex width="full" align="center" justify="space-between">
-          <Logo
-            onClick={(e) => {
-              if (window.location.pathname === "/") {
-                e.preventDefault();
-
-                window.scrollTo({
-                  top: 0,
-                  behavior: "smooth",
-                });
-              }
-            }}
-          />
-          {/* <Navigation /> */}
+          <Logo />
+          <Navigation />
         </Flex>
       </Container>
     </Box>
