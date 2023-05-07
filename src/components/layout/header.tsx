@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useRef, useSyncExternalStore } from "react";
 
 import {
   Box,
@@ -7,21 +7,22 @@ import {
   Flex,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { useScroll } from "framer-motion";
+
 import Navigation from "./navigation";
 import { Logo } from "./logo";
-import { useScroll } from "framer-motion";
 
 export interface HeaderProps extends Omit<BoxProps, "children"> {}
 
 export const Header = (props: HeaderProps) => {
-  const ref = React.useRef<HTMLHeadingElement>(null);
-  const [y, setY] = React.useState(0);
+  const ref = useRef<HTMLHeadingElement>(null);
   const { height = 0 } = ref.current?.getBoundingClientRect() ?? {};
 
   const { scrollY } = useScroll();
-  React.useEffect(() => {
-    return scrollY.onChange(() => setY(scrollY.get()));
-  }, [scrollY]);
+  const y = useSyncExternalStore(
+    (cb) => scrollY.onChange(cb),
+    () => scrollY.get()
+  );
 
   const bg = useColorModeValue("whiteAlpha.700", "blackAlpha.50");
 

@@ -5,15 +5,32 @@ import {
   Container,
   Text,
   Stack,
-  Flex,
   HStack,
 } from "@chakra-ui/react";
 
-import { Link, LinkProps } from "@saas-ui/react";
+import { NavLink } from "src/components/nav-link";
 
 export interface FooterProps extends BoxProps {
   columns?: number;
 }
+
+const NAV_LINKS = [
+  {
+    label: "Launch App",
+    href: "/app",
+    variant: "ghost",
+  },
+  {
+    id: "governance",
+    label: "Governance",
+    variant: "ghost",
+  },
+  {
+    id: "features",
+    label: "Features",
+    variant: "ghost",
+  },
+];
 
 export const Footer: React.FC<FooterProps> = ({ columns = 2, ...rest }) => {
   return (
@@ -21,19 +38,17 @@ export const Footer: React.FC<FooterProps> = ({ columns = 2, ...rest }) => {
       <Container maxW="container.2xl" px="8" py="8">
         <SimpleGrid columns={columns}>
           <Stack spacing="8">
-            <Stack alignItems="flex-start">
-              <Flex>{/* <Box as={logo} flex="1" height="32px" /> */}</Flex>
-              <Text fontSize="md" color="muted">
-                Simple savings
-              </Text>
-            </Stack>
-            <Copyright>Harbour Finance</Copyright>
+            <Copyright title="Harbour Finance" />
           </Stack>
           <HStack justify="flex-end" spacing="4" alignSelf="flex-end">
-            {[{ href: "", label: "" }].map(({ href, label }) => (
-              <FooterLink key={href} href={href}>
-                {label}
-              </FooterLink>
+            {NAV_LINKS.map(({ href, id, ...props }) => (
+              <NavLink
+                href={href || `/#${id}`}
+                key={href || `/#${id}`}
+                {...props}
+              >
+                {props.label}
+              </NavLink>
             ))}
           </HStack>
         </SimpleGrid>
@@ -43,35 +58,13 @@ export const Footer: React.FC<FooterProps> = ({ columns = 2, ...rest }) => {
 };
 
 export interface CopyrightProps {
-  title?: React.ReactNode;
-  children: React.ReactNode;
+  title: React.ReactNode;
 }
 
-export const Copyright: React.FC<CopyrightProps> = ({ title, children }) => {
-  let content;
-  if (title && !children) {
-    content = `&copy; ${new Date().getFullYear()} - ${title}`;
-  }
+export const Copyright: React.FC<CopyrightProps> = ({ title }) => {
   return (
     <Text color="muted" fontSize="sm">
-      {content || children}
+      &copy; {`${new Date().getFullYear()} - ${title}.`}
     </Text>
-  );
-};
-
-export const FooterLink: React.FC<LinkProps> = ({ children, ...rest }) => {
-  return (
-    <Link
-      color="muted"
-      fontSize="sm"
-      textDecoration="none"
-      _hover={{
-        color: "white",
-        transition: "color .2s ease-in",
-      }}
-      {...rest}
-    >
-      {children}
-    </Link>
   );
 };

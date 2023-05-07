@@ -1,5 +1,6 @@
 "use client";
 import type { NextPage } from "next";
+import { Inter } from "next/font/google";
 import {
   Container,
   Box,
@@ -23,6 +24,8 @@ import {
 import { Features } from "src/components/features";
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
 
+const font = Inter({ subsets: ["latin"], weight: "800" });
+
 const Home: NextPage = () => {
   return (
     <Box position="relative" overflow="hidden">
@@ -39,9 +42,16 @@ const Home: NextPage = () => {
             width="100%"
             px="0"
             title={
-              <FallInPlace textAlign="center" mt="8">
+              <FallInPlace textAlign="center">
                 Your Investments can
-                <Br /> <Text fontWeight="bold">Make a Difference</Text>
+                <Br />
+                <Text
+                  mt="4"
+                  textTransform="uppercase"
+                  className={font.className}
+                >
+                  Make a Difference
+                </Text>
               </FallInPlace>
             }
             description={
