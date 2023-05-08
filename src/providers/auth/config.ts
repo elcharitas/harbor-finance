@@ -1,19 +1,28 @@
-import { getDefaultWallets } from "@rainbow-me/rainbowkit";
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import {
+  metaMaskWallet,
+  walletConnectWallet,
+} from "@rainbow-me/rainbowkit/wallets";
 import { configureChains, createConfig, mainnet } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
-
-import CONFIG from "src/configs";
 
 export const { chains, publicClient } = configureChains(
   [mainnet],
   [publicProvider()]
 );
 
-export const { connectors } = getDefaultWallets({
-  appName: CONFIG.APP.NAME,
-  projectId: "YOUR_PROJECT_ID",
-  chains,
-});
+const connectors = connectorsForWallets([
+  {
+    groupName: "Recommended",
+    // @ts-expect-error No fix for this yet
+    wallets: [metaMaskWallet({ chains })],
+  },
+  {
+    groupName: "Others",
+    // @ts-expect-error No fix for this yet
+    wallets: [walletConnectWallet({ chains })],
+  },
+]);
 
 export const wagmiConfig = createConfig({
   autoConnect: true,

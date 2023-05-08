@@ -14,6 +14,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return (
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider
+        avatar={() => null}
         chains={chains}
         theme={theme}
         modalSize="compact"
