@@ -10,6 +10,7 @@ import { MobileNavContent } from "src/components/mobile-nav";
 import { useDisclosure } from "@chakra-ui/react";
 
 import ThemeToggle from "./theme-toggle";
+import { AuthButton } from "../auth";
 
 const NAV_LINKS = [
   {
@@ -21,9 +22,8 @@ const NAV_LINKS = [
     label: "Features",
   },
   {
-    label: "Connect Wallet",
-    href: "#",
-    variant: "outline",
+    id: "auth",
+    href: "",
   },
 ];
 
@@ -45,6 +45,9 @@ const Navigation: React.FC = () => {
   return (
     <HStack spacing="2" flexShrink={0}>
       {NAV_LINKS.map(({ href, id, ...props }, i) => {
+        if (id == "auth") {
+          return <AuthButton key={id} />;
+        }
         return (
           <NavLink
             display={["none", null, "block"]}

@@ -21,7 +21,8 @@ export const Header = (props: HeaderProps) => {
   const { scrollY } = useScroll();
   const y = useSyncExternalStore(
     (cb) => scrollY.onChange(cb),
-    () => scrollY.get()
+    () => scrollY.get(),
+    () => 0
   );
 
   const bg = useColorModeValue("whiteAlpha.700", "blackAlpha.50");

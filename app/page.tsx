@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { Inter } from "next/font/google";
 import {
@@ -23,10 +24,35 @@ import {
 } from "react-icons/fi";
 import { Features } from "src/components/features";
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
+import { MotionBox } from "src/components/motion/box";
 
 const font = Inter({ subsets: ["latin"], weight: "800" });
 
+const flipTransition = {
+  duration: 1,
+  yoyo: Infinity,
+  ease: "easeOut",
+};
+
+const HERO_TAGLINES = [
+  "Make a Difference",
+  "Grow Your Wealth",
+  "Save the Planet",
+];
+
 const Home: NextPage = () => {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTick((current) => (current + 1) % 3);
+    }, 2000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
   return (
     <Box position="relative" overflow="hidden">
       <BackgroundGradient height="100%" />
@@ -45,13 +71,19 @@ const Home: NextPage = () => {
               <FallInPlace textAlign="center">
                 Your Investments can
                 <Br />
-                <Text
+                <MotionBox
                   mt="4"
                   textTransform="uppercase"
                   className={font.className}
+                  style={{ originY: 0.5 }}
+                  transition={flipTransition}
+                  animate={{
+                    scale: [1, 1.4, 1],
+                    rotateX: [0, 0, 180],
+                  }}
                 >
-                  Make a Difference
-                </Text>
+                  {HERO_TAGLINES[tick]}
+                </MotionBox>
               </FallInPlace>
             }
             description={
@@ -112,7 +144,7 @@ const Home: NextPage = () => {
       </Container>
 
       <Features
-        id="benefits"
+        id="features"
         columns={[1, 2, 4]}
         iconSize={4}
         innerWidth="container.xl"

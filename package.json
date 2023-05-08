@@ -16,13 +16,14 @@
     "@emotion/styled": "^11",
     "@fontsource/inter": "^4.5.15",
     "@fontsource/lato": "^4.5.10",
-    "@rainbow-me/rainbowkit": "0.12.13",
+    "@rainbow-me/rainbowkit": "1.0.0",
     "@saas-ui/auth": "^1.7.6",
     "@saas-ui/react": "2.0.0-next.20",
     "@types/node": "20.1.1",
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
     "autoprefixer": "10.4.14",
+    "encoding": "0.1.13",
     "eslint": "8.40.0",
     "eslint-config-next": "13.4.1",
     "ethers": "6.3.0",
@@ -33,6 +34,7 @@
     "react-icons": "^4.8.0",
     "typescript": "5.0.4",
     "usehooks-ts": "2.9.1",
-    "wagmi": "1.0.1"
+    "viem": "0.3.31",
+    "wagmi": "1.0.5"
   }
 }
