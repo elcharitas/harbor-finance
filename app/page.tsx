@@ -25,6 +25,7 @@ import {
 import { Features } from "src/components/features";
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
 import { MotionBox } from "src/components/motion/box";
+import { NavLink } from "src/components/nav-link";
 
 const font = Inter({ subsets: ["latin"], weight: "800" });
 
@@ -117,11 +118,12 @@ const Home: NextPage = () => {
                 }}
               >
                 <Button size="lg" variant="outline">
-                  Connect Wallet
+                  Watch a Demo
                 </Button>
-                <Button
+                <NavLink
                   size="lg"
                   variant="primary"
+                  href="/app"
                   rightIcon={
                     <Icon
                       as={FiArrowRight}
@@ -135,8 +137,8 @@ const Home: NextPage = () => {
                     />
                   }
                 >
-                  Watch a Demo
-                </Button>
+                  Launch App
+                </NavLink>
               </ButtonGroup>
             </FallInPlace>
           </Hero>
