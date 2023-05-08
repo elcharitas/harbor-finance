@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 
 import { NavLink } from "src/components/nav-link";
+import CONFIG from "src/configs";
 
 export interface FooterProps extends BoxProps {
   columns?: number;
@@ -38,7 +39,7 @@ export const Footer: React.FC<FooterProps> = ({ columns = 2, ...rest }) => {
       <Container maxW="container.2xl" px="8" py="8">
         <SimpleGrid columns={columns}>
           <Stack spacing="8">
-            <Copyright title="Harbour Finance" />
+            <Copyright title={CONFIG.APP.NAME} />
           </Stack>
           <HStack justify="flex-end" spacing="4" alignSelf="flex-end">
             {NAV_LINKS.map(({ href, id, ...props }) => (

@@ -14,13 +14,18 @@ export const { chains, publicClient } = configureChains(
 const connectors = connectorsForWallets([
   {
     groupName: "Recommended",
-    // @ts-expect-error No fix for this yet
-    wallets: [metaMaskWallet({ chains })],
+    wallets: [
+      // @ts-ignore No fix for this yet
+      metaMaskWallet({ chains }),
+    ],
   },
   {
     groupName: "Others",
-    // @ts-expect-error No fix for this yet
-    wallets: [walletConnectWallet({ chains })],
+
+    wallets: [
+      // @ts-ignore No fix for this yet
+      walletConnectWallet({ chains }),
+    ],
   },
 ]);
 
