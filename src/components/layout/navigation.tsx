@@ -46,7 +46,7 @@ const Navigation: React.FC = () => {
     <HStack spacing="2" flexShrink={0}>
       {NAV_LINKS.map(({ href, id, ...props }, i) => {
         if (id == "auth") {
-          return <AuthButton key={id} />;
+          return <AuthButton key={id} display={["none", null, "block"]} />;
         }
         return (
           <NavLink

@@ -110,7 +110,7 @@ const Home: NextPage = () => {
                     flexDirection: "column",
                     alignItems: "stretch",
                     gap: "4",
-                    button: {
+                    a: {
                       marginInlineStart: "0 !important",
                     },
                   },

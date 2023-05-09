@@ -46,6 +46,7 @@ export const Footer: React.FC<FooterProps> = ({ columns = 2, ...rest }) => {
               <NavLink
                 href={href || `/#${id}`}
                 key={href || `/#${id}`}
+                display={["none", null, "block"]}
                 {...props}
               >
                 {props.label}

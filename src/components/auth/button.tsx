@@ -1,7 +1,7 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Button } from "@chakra-ui/react";
+import { Button, ButtonProps } from "@chakra-ui/react";
 
-export const AuthButton = () => {
+export const AuthButton: React.FC<ButtonProps> = (props) => {
   return (
     <ConnectButton.Custom>
       {({
@@ -27,21 +27,25 @@ export const AuthButton = () => {
             {(() => {
               if (!connected) {
                 return (
-                  <Button onClick={openConnectModal} variant="outline">
+                  <Button
+                    onClick={openConnectModal}
+                    variant="outline"
+                    {...props}
+                  >
                     Connect Wallet
                   </Button>
                 );
               }
               if (chain.unsupported) {
                 return (
-                  <Button onClick={openChainModal} variant="outline">
+                  <Button onClick={openChainModal} variant="outline" {...props}>
                     Wrong network
                   </Button>
                 );
               }
               return (
                 <div style={{ display: "flex", gap: 12 }}>
-                  <Button onClick={openChainModal} variant="outline">
+                  <Button onClick={openChainModal} variant="outline" {...props}>
                     {chain.iconUrl ? (
                       <img
                         alt={chain.name ?? "Chain icon"}
@@ -52,7 +56,7 @@ export const AuthButton = () => {
                       chain.name
                     )}
                   </Button>
-                  <Button onClick={openAccountModal} mr="1">
+                  <Button onClick={openAccountModal} mr="1" {...props}>
                     {account.displayName}
                   </Button>
                 </div>
