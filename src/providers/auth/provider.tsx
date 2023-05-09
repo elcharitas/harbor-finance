@@ -1,5 +1,6 @@
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiConfig } from "wagmi";
+import { Avatar } from "@chakra-ui/react";
 import "@rainbow-me/rainbowkit/styles.css";
 
 import CONFIG from "src/configs";
@@ -14,14 +15,16 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return (
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider
-        avatar={() => null}
-        chains={chains}
         theme={theme}
+        chains={chains}
         modalSize="compact"
         appInfo={{
           appName: CONFIG.APP.NAME,
           learnMoreUrl: "/docs/wallets",
         }}
+        avatar={({ ensImage, address }) => (
+          <Avatar name={address} src={ensImage ?? address} />
+        )}
       >
         {children}
       </RainbowKitProvider>
