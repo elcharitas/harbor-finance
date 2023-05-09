@@ -1,0 +1,22 @@
+{
+  "id": "/app",
+  "short_name": "Harbor",
+  "name": "Harbor Finance",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/app",
+  "background_color": "#2d68bd",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#000000"
+}

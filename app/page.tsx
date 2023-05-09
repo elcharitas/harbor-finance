@@ -30,7 +30,7 @@ const font = Inter({ subsets: ["latin"], weight: "800" });
 
 const flipTransition = {
   duration: 1,
-  yoyo: Infinity,
+  repeat: Infinity,
   ease: "easeOut",
 };
 
