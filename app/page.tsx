@@ -9,7 +9,6 @@ import {
   ButtonGroup,
   Button,
   Icon,
-  Text,
 } from "@chakra-ui/react";
 
 import { FallInPlace } from "src/components/motion/fall-in-place";
