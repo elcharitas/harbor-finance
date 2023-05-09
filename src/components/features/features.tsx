@@ -13,6 +13,7 @@ import {
   useMultiStyleConfig,
   ThemingProps,
   SystemProps,
+  StackProps,
 } from "@chakra-ui/react";
 
 import {
@@ -31,6 +32,7 @@ export interface FeaturesProps
   title?: React.ReactNode;
   description?: React.ReactNode;
   features: Array<FeatureProps>;
+  featureProps?: StackProps;
   columns?: ResponsiveValue<number>;
   spacing?: string | number;
   aside?: React.ReactChild;
@@ -39,7 +41,7 @@ export interface FeaturesProps
   innerWidth?: SystemProps["maxW"];
 }
 
-export interface FeatureProps {
+export interface FeatureProps extends Omit<StackProps, "title"> {
   title?: React.ReactNode;
   description?: React.ReactNode;
   icon?: any;
@@ -59,6 +61,7 @@ export const Feature: React.FC<FeatureProps> = (props) => {
     iconSize = 8,
     ip,
     variant,
+    ...rest
   } = props;
   const styles = useMultiStyleConfig("Feature", { variant });
 
@@ -66,7 +69,7 @@ export const Feature: React.FC<FeatureProps> = (props) => {
   const direction = pos === "left" ? "row" : "column";
 
   return (
-    <Stack sx={styles.container} direction={direction}>
+    <Stack sx={styles.container} direction={direction} {...rest}>
       {icon && (
         <Circle sx={styles.icon}>
           <Icon as={icon} boxSize={iconSize} />
@@ -91,6 +94,7 @@ export const Features: React.FC<FeaturesProps> = (props) => {
     iconSize = 8,
     aside,
     reveal: Wrap = Revealer,
+    featureProps,
     ...rest
   } = props;
 
@@ -115,7 +119,12 @@ export const Features: React.FC<FeaturesProps> = (props) => {
             {features.map((feature, i) => {
               return (
                 <Wrap key={i} delay={feature.delay}>
-                  <Feature iconSize={iconSize} {...feature} ip={ip} />
+                  <Feature
+                    iconSize={iconSize}
+                    {...feature}
+                    {...featureProps}
+                    ip={ip}
+                  />
                 </Wrap>
               );
             })}

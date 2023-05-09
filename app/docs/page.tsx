@@ -7,7 +7,7 @@ import { PageTransition } from "src/components/motion/page-transition";
 import { Section } from "src/components/section";
 import { Features } from "src/components/features";
 
-const App: NextPage = () => {
+const Docs: NextPage = () => {
   return (
     <Section height="calc(100vh - 200px)">
       <BackgroundGradient zIndex="-1" />
@@ -44,4 +44,4 @@ const App: NextPage = () => {
   );
 };
 
-export default App;
+export default Docs;
