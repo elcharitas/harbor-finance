@@ -1,18 +1,58 @@
 "use client";
 import { NextPage } from "next";
-import { Center } from "@chakra-ui/react";
+import { Button, ButtonGroup, HStack, Stack, Text } from "@chakra-ui/react";
+import { Select, SelectButton, SelectList } from "@saas-ui/react";
 
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
 import { PageTransition } from "src/components/motion/page-transition";
 import { Section } from "src/components/section";
-import { Features } from "src/components/features";
+import { Feature, Features } from "src/components/features";
 
 const App: NextPage = () => {
   return (
-    <Section height="calc(100vh - 200px)">
+    <Section height="calc(100vh - 200px)" p="0">
       <BackgroundGradient zIndex="-1" />
 
-      <Center height="100%" pt="20">
+      <Stack height="100%" pt="20">
+        <HStack
+          alignItems="center"
+          justifyContent="space-between"
+          px="12"
+          mt="24"
+        >
+          <Feature
+            title="Earnings"
+            description={
+              <HStack>
+                <Text
+                  as="span"
+                  fontSize="2xl"
+                  fontWeight="bolder"
+                  cursor="pointer"
+                >
+                  0.00
+                </Text>
+                <Select
+                  name="country"
+                  defaultValue="nl"
+                  options={[
+                    { label: "USDC", value: "nl" },
+                    { label: "BUSD", value: "us" },
+                  ]}
+                >
+                  <SelectButton />
+                  <SelectList fontSize="sm" />
+                </Select>
+              </HStack>
+            }
+          />
+          <ButtonGroup>
+            <Button variant="outline" size="md" px="8">
+              Borrow
+            </Button>
+          </ButtonGroup>
+        </HStack>
+
         <PageTransition width="100%">
           <Features
             features={[
@@ -27,7 +67,7 @@ const App: NextPage = () => {
                 delay: 0.8,
               },
             ]}
-            columns={2}
+            columns={[1, 2]}
             featureProps={{
               borderRadius: "md",
               borderColor: "whiteAlpha.200",
@@ -37,9 +77,12 @@ const App: NextPage = () => {
                 boxShadow: "xl",
               },
             }}
+            pt="4"
+            px="0"
+            mx="0"
           />
         </PageTransition>
-      </Center>
+      </Stack>
     </Section>
   );
 };
