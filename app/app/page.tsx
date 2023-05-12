@@ -1,7 +1,23 @@
 "use client";
 import { NextPage } from "next";
-import { Button, ButtonGroup, HStack, Stack, Text } from "@chakra-ui/react";
-import { Select, SelectButton, SelectList } from "@saas-ui/react";
+import {
+  Button,
+  ButtonGroup,
+  HStack,
+  ModalFooter,
+  Stack,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react";
+import {
+  Field,
+  FormDialog,
+  FormLayout,
+  Select,
+  SelectButton,
+  SelectList,
+  SubmitButton,
+} from "@saas-ui/react";
 
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
 import { PageTransition } from "src/components/motion/page-transition";
@@ -9,6 +25,8 @@ import { Section } from "src/components/section";
 import { Feature, Features } from "src/components/features";
 
 const App: NextPage = () => {
+  const disclosure = useDisclosure();
+
   return (
     <Section height="calc(100vh - 200px)" p="0">
       <BackgroundGradient zIndex="-1" />
@@ -47,8 +65,16 @@ const App: NextPage = () => {
             }
           />
           <ButtonGroup>
-            <Button variant="outline" size="md" px="8">
+            <Button variant="outline" size="md" px="6">
               Borrow
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              px="6"
+              onClick={disclosure.onOpen}
+            >
+              Withdraw
             </Button>
           </ButtonGroup>
         </HStack>
@@ -83,6 +109,30 @@ const App: NextPage = () => {
           />
         </PageTransition>
       </Stack>
+      <FormDialog
+        title=" "
+        onSubmit={() => null}
+        {...disclosure}
+        footer={
+          <ModalFooter>
+            <SubmitButton>Withdraw</SubmitButton>
+          </ModalFooter>
+        }
+      >
+        <FormLayout>
+          <Field
+            name="amount"
+            label="Amount:"
+            rules={{ required: "Amount is required" }}
+            type="number"
+          />
+          <Field
+            name="address"
+            label="Wallet Address:"
+            rules={{ required: "Wallet Address is required" }}
+          />
+        </FormLayout>
+      </FormDialog>
     </Section>
   );
 };

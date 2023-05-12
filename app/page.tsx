@@ -34,11 +34,7 @@ const flipTransition = {
   ease: "easeOut",
 };
 
-const HERO_TAGLINES = [
-  "Make a Difference",
-  "Grow Your Wealth",
-  "Save the Planet",
-];
+const HERO_TAGLINES = ["Make a Difference", "Grow Wealth", "Save the Planet"];
 
 const Home: NextPage = () => {
   const [tick, setTick] = useState(0);
