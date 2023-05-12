@@ -1,17 +1,23 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Button, ButtonProps } from "@chakra-ui/react";
+import { useDisconnect } from "wagmi";
+import { FiUser, FiLogOut, FiActivity, FiSun, FiMoon } from "react-icons/fi";
+import Link from "next/link";
+import {
+  Button,
+  ButtonProps,
+  Menu,
+  MenuItem,
+  MenuButton,
+  MenuList,
+  useColorMode,
+} from "@chakra-ui/react";
 
 export const AuthButton: React.FC<ButtonProps> = (props) => {
+  const { disconnect } = useDisconnect();
+  const { colorMode, toggleColorMode } = useColorMode();
   return (
     <ConnectButton.Custom>
-      {({
-        account,
-        chain,
-        openAccountModal,
-        openChainModal,
-        openConnectModal,
-        mounted,
-      }) => {
+      {({ account, chain, openChainModal, openConnectModal, mounted }) => {
         const connected = mounted && account && chain;
         return (
           <div
@@ -56,9 +62,36 @@ export const AuthButton: React.FC<ButtonProps> = (props) => {
                       chain.name
                     )}
                   </Button>
-                  <Button onClick={openAccountModal} mr="1" {...props}>
-                    {account.displayName}
-                  </Button>
+                  <Menu>
+                    <MenuButton
+                      as={Button}
+                      aria-label={account.displayName}
+                      mr="1"
+                      {...props}
+                    >
+                      {account.displayName}
+                    </MenuButton>
+                    <MenuList fontSize="sm">
+                      <Link href="/app">
+                        <MenuItem icon={<FiActivity />}>Dashboard</MenuItem>
+                      </Link>
+                      <MenuItem icon={<FiUser />}>
+                        Connect Lens Profile
+                      </MenuItem>
+                      <MenuItem
+                        icon={colorMode === "light" ? <FiMoon /> : <FiSun />}
+                        onClick={toggleColorMode}
+                      >
+                        {colorMode === "dark" ? "Light" : "Night"} Mode
+                      </MenuItem>
+                      <MenuItem
+                        icon={<FiLogOut />}
+                        onClick={() => disconnect()}
+                      >
+                        Log out
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
                 </div>
               );
             })()}

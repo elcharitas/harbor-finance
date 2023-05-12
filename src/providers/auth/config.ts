@@ -3,11 +3,12 @@ import {
   metaMaskWallet,
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
-import { configureChains, createConfig, mainnet } from "wagmi";
+import { configureChains, createConfig } from "wagmi";
+import { polygonMumbai } from "viem/chains";
 import { publicProvider } from "wagmi/providers/public";
 
 export const { chains, publicClient } = configureChains(
-  [mainnet],
+  [polygonMumbai],
   [publicProvider()]
 );
 
