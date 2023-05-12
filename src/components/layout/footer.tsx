@@ -22,14 +22,16 @@ const NAV_LINKS = [
     variant: "ghost",
   },
   {
-    id: "governance",
-    label: "Governance",
+    label: "Github",
     variant: "ghost",
+    href: "https://github.com/",
+    title: "View the Source code",
   },
   {
-    id: "features",
-    label: "Features",
+    label: "YouTube Demo",
     variant: "ghost",
+    href: "https://youtube.com/",
+    title: "Watch Harbor in action",
   },
 ];
 
@@ -42,11 +44,12 @@ export const Footer: React.FC<FooterProps> = ({ columns = 2, ...rest }) => {
             <Copyright title={CONFIG.APP.NAME} />
           </Stack>
           <HStack justify="flex-end" spacing="4" alignSelf="flex-end">
-            {NAV_LINKS.map(({ href, id, ...props }) => (
+            {NAV_LINKS.map(({ href, ...props }) => (
               <NavLink
-                href={href || `/#${id}`}
-                key={href || `/#${id}`}
+                href={href}
+                key={href}
                 display={["none", null, "block"]}
+                target={href.includes("https") ? "_blank" : undefined}
                 {...props}
               >
                 {props.label}

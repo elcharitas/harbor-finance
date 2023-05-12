@@ -18,12 +18,21 @@ const NAV_LINKS = [
     label: "Governance",
   },
   {
+    label: "Github",
+    href: "https://github.com/",
+    title: "View the Source code",
+  },
+  {
+    label: "YouTube Demo",
+    href: "https://youtube.com/",
+    title: "Watch Harbor in action",
+  },
+  {
     id: "features",
     label: "Features",
   },
   {
     id: "auth",
-    href: "",
   },
 ];
 
@@ -54,6 +63,7 @@ const Navigation: React.FC = () => {
             href={href || `/#${id}`}
             key={href || `/#${id}`}
             isActive={!!(id && activeId === id)}
+            target={href?.includes("https") ? "_blank" : undefined}
             {...props}
           >
             {props.label}
