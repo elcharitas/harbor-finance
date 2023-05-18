@@ -2,6 +2,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useDisconnect } from "wagmi";
 import { FiUser, FiLogOut, FiActivity, FiSun, FiMoon } from "react-icons/fi";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Button,
   ButtonProps,
@@ -53,10 +54,11 @@ export const AuthButton: React.FC<ButtonProps> = (props) => {
                 <div style={{ display: "flex", gap: 12 }}>
                   <Button onClick={openChainModal} variant="outline" {...props}>
                     {chain.iconUrl ? (
-                      <img
+                      <Image
                         alt={chain.name ?? "Chain icon"}
                         src={chain.iconUrl}
-                        style={{ width: 12, height: 12 }}
+                        width={12}
+                        height={12}
                       />
                     ) : (
                       chain.name
