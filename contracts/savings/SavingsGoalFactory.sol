@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import "./SavingsGoal.sol";
 
 /**
@@ -13,9 +14,9 @@ import "./SavingsGoal.sol";
  * @author elcharitas <jonathanirhodia@gmail.com> - https://links.dev/elcharitas
  */
 contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
-    address[] private allSavingsGoals;
+    address[] public allSavingsGoals;
 
-    address[] private allowedTokens;
+    address[] public allowedTokens;
 
     event SavingsGoalCreated(
         address indexed savingsGoal,
@@ -90,6 +91,11 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
         string memory goalName,
         string memory goalDescription
     ) external {
+        require(
+            isTokenAllowed(daiToken),
+            "Token is not allowed for savings goals"
+        );
+
         SavingsGoal newSavingsGoal = new SavingsGoal(
             daiToken,
             goalAmount,
@@ -100,9 +106,11 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
 
         newSavingsGoal.transferOwnership(msg.sender);
 
-        allSavingsGoals.push(address(newSavingsGoal));
+        address newSavingAddress = address(newSavingsGoal);
 
-        emit SavingsGoalCreated(address(newSavingsGoal), msg.sender);
+        allSavingsGoals.push(newSavingAddress);
+
+        emit SavingsGoalCreated(newSavingAddress, msg.sender);
     }
 
     /**

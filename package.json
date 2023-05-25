@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:contracts": "hardhat test"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.6.1",
@@ -19,14 +20,9 @@
     "@rainbow-me/rainbowkit": "1.0.0",
     "@saas-ui/auth": "^1.7.6",
     "@saas-ui/react": "2.0.0-next.20",
-    "@types/node": "20.1.1",
-    "@types/react": "18.2.6",
-    "@types/react-dom": "18.2.4",
     "autoprefixer": "10.4.14",
     "encoding": "0.1.13",
-    "eslint": "8.40.0",
-    "eslint-config-next": "13.4.1",
-    "ethers": "6.3.0",
+    "ethers": "5",
     "framer-motion": "^6",
     "next": "13.4.1",
     "react": "18.2.0",
@@ -42,7 +38,25 @@
     "@chainlink/test-helpers": "0.0.7-alpha",
     "@chainlink/token": "1.1.0",
     "@ethersproject/abi": "5.7.0",
+    "@ethersproject/providers": "5.7.2",
+    "@nomicfoundation/hardhat-chai-matchers": "1",
+    "@nomicfoundation/hardhat-network-helpers": "1.0.8",
+    "@nomicfoundation/hardhat-toolbox": "2.0.2",
+    "@nomiclabs/hardhat-ethers": "2.2.3",
+    "@nomiclabs/hardhat-etherscan": "3.1.7",
     "@openzeppelin/contracts": "4.9.0",
-    "hardhat": "2.14.0"
+    "@typechain/ethers-v5": "11.0.0",
+    "@typechain/hardhat": "7.0.0",
+    "@types/node": "20.1.1",
+    "@types/react": "18.2.6",
+    "@types/react-dom": "18.2.4",
+    "chai": "4.3.7",
+    "eslint": "8.40.0",
+    "eslint-config-next": "13.4.1",
+    "hardhat": "2.14.0",
+    "hardhat-gas-reporter": "1.0.9",
+    "solidity-coverage": "0.8.2",
+    "ts-node": "10.9.1",
+    "typechain": "8.2.0"
   }
 }

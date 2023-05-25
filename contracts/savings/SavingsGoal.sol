@@ -2,7 +2,8 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IHERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 
 /**
  * SavingsGoal contract
@@ -46,19 +47,6 @@ contract SavingsGoal is Ownable {
         goalName = _goalName;
         goalDescription = _goalDescription;
 
-        IHERC20 dai = IHERC20(token);
-
-        // Approve the contract to spend the total amount from the user's wallet
-        dai.permit(
-            msg.sender,
-            address(this),
-            goalAmount,
-            block.timestamp + daysToReachGoal,
-            0,
-            bytes32(0),
-            bytes32(0)
-        );
-
         startTimestamp = block.timestamp;
     }
 
@@ -68,7 +56,7 @@ contract SavingsGoal is Ownable {
         uint256 elapsedTime = block.timestamp - startTimestamp;
         require(elapsedTime <= daysToReachGoal, "Goal period has ended");
 
-        IHERC20 dai = IHERC20(token);
+        IERC20 dai = IERC20(token);
 
         uint256 goalBalance = dai.balanceOf(address(this));
         require(goalBalance < goalAmount, "Goal has been reached");
@@ -94,7 +82,7 @@ contract SavingsGoal is Ownable {
      * @notice Returns the balance of the contract
      */
     function balanceOf() public view returns (uint256) {
-        IHERC20 dai = IHERC20(token);
+        IERC20 dai = IERC20(token);
         return dai.balanceOf(address(this));
     }
 
@@ -103,7 +91,7 @@ contract SavingsGoal is Ownable {
      * @dev Only the owner of the contract can call this function
      */
     function withdraw() external onlyOwner {
-        IHERC20 dai = IHERC20(token);
+        IERC20 dai = IERC20(token);
         uint256 goalBalance = dai.balanceOf(address(this));
 
         require(goalAmount >= goalBalance, "Goal not reached");
