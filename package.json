@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:contracts": "hardhat compile",
     "start": "next start",
     "lint": "next lint",
     "test:contracts": "hardhat test"

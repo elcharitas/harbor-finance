@@ -29,7 +29,10 @@
       ],
       "@contract-types/*": [
         "./typechain-types/*"
-      ]
+      ],
+      "@contracts/*": [
+        "./artifacts/contracts/*"
+      ],
     }
   },
   "include": [
