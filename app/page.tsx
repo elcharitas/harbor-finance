@@ -25,6 +25,7 @@ import { Features } from "src/components/features";
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
 import { MotionBox } from "src/components/motion/box";
 import { NavLink } from "src/components/nav-link";
+import { useTranslate } from "src/hooks/use-translate";
 
 const font = Inter({ subsets: ["latin"], weight: "800" });
 
@@ -34,10 +35,13 @@ const flipTransition = {
   ease: "easeOut",
 };
 
-const HERO_TAGLINES = ["Make a Difference", "Grow Wealth", "Save the Planet"];
+const HERO_TAGLINES = ["text_primary", "text_secondary", "text_tertiary"];
 
 const Home: NextPage = () => {
   const [tick, setTick] = useState(0);
+  const hero = useTranslate("hero");
+  const features = useTranslate("features");
+  const common = useTranslate("common");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -65,7 +69,7 @@ const Home: NextPage = () => {
             px="0"
             title={
               <FallInPlace textAlign="center">
-                Your Investments can
+                {hero.title}
                 <Br />
                 <MotionBox
                   mt="4"
@@ -78,7 +82,7 @@ const Home: NextPage = () => {
                     rotateX: [0, 0, 180],
                   }}
                 >
-                  {HERO_TAGLINES[tick]}
+                  {hero[HERO_TAGLINES[tick]]}
                 </MotionBox>
               </FallInPlace>
             }
@@ -89,8 +93,7 @@ const Home: NextPage = () => {
                 textAlign="center"
                 width="100%"
               >
-                Harbour Finance is decentralised finance (DeFi) protocol that
-                allows users to earn interest on their crypto assets.
+                {hero.description}
               </FallInPlace>
             }
           >
@@ -113,7 +116,7 @@ const Home: NextPage = () => {
                 }}
               >
                 <Button size="lg" variant="outline">
-                  Watch a Demo
+                  {common.watch_demo}
                 </Button>
                 <NavLink
                   size="lg"
@@ -132,7 +135,7 @@ const Home: NextPage = () => {
                     />
                   }
                 >
-                  Launch App
+                  {common.launch_app}
                 </NavLink>
               </ButtonGroup>
             </FallInPlace>
@@ -148,34 +151,30 @@ const Home: NextPage = () => {
         pt="20"
         features={[
           {
-            title: "Decentralized Investments",
+            title: features.primary_title,
             icon: FiGlobe,
-            description:
-              "Harbour Finance is a blockchain-based protocol, fostering transparent, secure, and unrestricted green investments.",
+            description: features.primary_description,
             iconPosition: "left",
             delay: 0.6,
           },
           {
-            title: "Diversified Portfolios",
+            title: features.secondary_title,
             icon: FiPieChart,
-            description:
-              "Harbour Finance offers unique investment opportunities across various asset classes in crypto.",
+            description: features.secondary_description,
             iconPosition: "left",
             delay: 0.8,
           },
           {
-            title: "Real-Time Growth Data",
+            title: features.tertiary_title,
             icon: FiClock,
-            description:
-              "Through our seamless integration with Chainlink, we provide real-time growth data directly on your dashboard.",
+            description: features.tertiary_description,
             iconPosition: "left",
             delay: 1,
           },
           {
-            title: "Community-Driven Philosophy",
+            title: features.quaternary_title,
             icon: FiThumbsUp,
-            description:
-              "As a community-driven platform, Harbour Finance ensures every user has a voice in shaping the future of DeFi.",
+            description: features.quaternary_description,
             iconPosition: "left",
             delay: 1.1,
           },

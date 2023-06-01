@@ -12,10 +12,12 @@ import {
   MenuList,
   useColorMode,
 } from "@chakra-ui/react";
+import { useTranslate } from "src/hooks/use-translate";
 
 export const AuthButton: React.FC<ButtonProps> = (props) => {
   const { disconnect } = useDisconnect();
   const { colorMode, toggleColorMode } = useColorMode();
+  const auth = useTranslate("auth");
   return (
     <ConnectButton.Custom>
       {({ account, chain, openChainModal, openConnectModal, mounted }) => {
@@ -39,14 +41,14 @@ export const AuthButton: React.FC<ButtonProps> = (props) => {
                     variant="outline"
                     {...props}
                   >
-                    Connect Wallet
+                    {auth.connect_wallet}
                   </Button>
                 );
               }
               if (chain.unsupported) {
                 return (
                   <Button onClick={openChainModal} variant="outline" {...props}>
-                    Wrong network
+                    {auth.wrong_network}
                   </Button>
                 );
               }
@@ -75,11 +77,11 @@ export const AuthButton: React.FC<ButtonProps> = (props) => {
                     </MenuButton>
                     <MenuList fontSize="sm">
                       <Link href="/app">
-                        <MenuItem icon={<FiActivity />}>Dashboard</MenuItem>
+                        <MenuItem icon={<FiActivity />}>
+                          {auth.dashboard}
+                        </MenuItem>
                       </Link>
-                      <MenuItem icon={<FiUser />}>
-                        Connect Lens Profile
-                      </MenuItem>
+                      <MenuItem icon={<FiUser />}>{auth.lens_profile}</MenuItem>
                       <MenuItem
                         icon={colorMode === "light" ? <FiMoon /> : <FiSun />}
                         onClick={toggleColorMode}
@@ -90,7 +92,7 @@ export const AuthButton: React.FC<ButtonProps> = (props) => {
                         icon={<FiLogOut />}
                         onClick={() => disconnect()}
                       >
-                        Log out
+                        {auth.disconnect_wallet}
                       </MenuItem>
                     </MenuList>
                   </Menu>
