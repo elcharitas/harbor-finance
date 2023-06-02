@@ -22,7 +22,7 @@ describe("SavingsGoalFactory", function () {
     await daiToken.connect(owner).transfer(savingsGoalFactory.address, 10000);
   });
 
-  it("Should create a savings goal", async function () {
+  it("should create a savings goal", async function () {
     const goalAmount = ethers.utils.parseEther("1000");
     const daysToReachGoal = 30;
     const goalName = "New Laptop";
@@ -40,19 +40,6 @@ describe("SavingsGoalFactory", function () {
         goalDescription
       );
 
-    // permit the factory to spend the dai token
-    await daiToken
-      .connect(owner)
-      .permit(
-        owner.address,
-        savingsGoalFactory.address,
-        10000,
-        daysToReachGoal * 24 * 60 * 60,
-        0,
-        "0x0",
-        "0x0"
-      );
-
     const allSavingsGoals = await savingsGoalFactory.getAllSavingsGoals();
     expect(allSavingsGoals.length).to.equal(1);
 
@@ -60,19 +47,69 @@ describe("SavingsGoalFactory", function () {
     expect(userSavingsGoals.length).to.equal(1);
   });
 
-  it("Should add a token to the list of allowed tokens", async function () {
+  it("should add a token to the list of allowed tokens", async function () {
     await savingsGoalFactory.connect(owner).addToken(daiToken.address);
 
     const isAllowed = await savingsGoalFactory.isTokenAllowed(daiToken.address);
     expect(isAllowed).to.be.true;
   });
 
-  it("Should remove a token from the list of allowed tokens", async function () {
+  it("should remove a token from the list of allowed tokens", async function () {
     await savingsGoalFactory.connect(owner).addToken(daiToken.address);
 
     await savingsGoalFactory.connect(owner).removeToken(daiToken.address);
 
     const isAllowed = await savingsGoalFactory.isTokenAllowed(daiToken.address);
     expect(isAllowed).to.be.false;
+  });
+
+  it("should not allow a non-owner to add a token", async function () {
+    const [, nonOwner] = await ethers.getSigners();
+    await expect(
+      savingsGoalFactory.connect(nonOwner).addToken(daiToken.address)
+    ).to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("should not allow a non-owner to remove a token", async function () {
+    const [, nonOwner] = await ethers.getSigners();
+    await expect(
+      savingsGoalFactory.connect(nonOwner).removeToken(daiToken.address)
+    ).to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("should checkUpkeep and return false at first", async function () {
+    const [upkeepNeeded] = await savingsGoalFactory.checkUpkeep("0x");
+    expect(upkeepNeeded).to.be.false;
+  });
+
+  it("should checkUpkeep and return the correct values", async function () {
+    const goalAmount = ethers.utils.parseEther("1000");
+    const daysToReachGoal = 30;
+    const goalName = "New Laptop";
+    const goalDescription = "Save up for a new laptop";
+
+    await savingsGoalFactory.connect(owner).addToken(daiToken.address);
+
+    await savingsGoalFactory
+      .connect(owner)
+      .createSavingsGoal(
+        daiToken.address,
+        goalAmount,
+        daysToReachGoal,
+        goalName,
+        goalDescription
+      );
+
+    const [upkeepNeeded, performData] = await savingsGoalFactory.checkUpkeep(
+      "0x"
+    );
+    expect(upkeepNeeded).to.be.true;
+
+    const allSavingsGoals = await savingsGoalFactory.getAllSavingsGoals();
+    const performDataParsed = ethers.utils.defaultAbiCoder.decode(
+      ["address[]"],
+      performData
+    );
+    expect(performDataParsed[0][0]).to.equal(allSavingsGoals[0]);
   });
 });
