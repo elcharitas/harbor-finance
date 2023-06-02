@@ -57,7 +57,9 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
             address[] memory batch = new address[](endIndex - i);
 
             for (uint256 j = i; j < endIndex; j++) {
-                SavingsGoal savingsGoal = SavingsGoal(allSavingsGoals[j]);
+                SavingsGoal savingsGoal = SavingsGoal(
+                    payable(allSavingsGoals[j])
+                );
                 if (
                     (block.timestamp - savingsGoal.startTimestamp()) % 1 days ==
                     0
@@ -85,7 +87,7 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
         address[] memory savingsGoals = abi.decode(performData, (address[]));
 
         for (uint256 i = 0; i < savingsGoals.length; i++) {
-            SavingsGoal savingsGoal = SavingsGoal(savingsGoals[i]);
+            SavingsGoal savingsGoal = SavingsGoal(payable(savingsGoals[i]));
 
             if (!savingsGoal.isGoalReached()) {
                 savingsGoal.addFunds();

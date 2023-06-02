@@ -97,4 +97,10 @@ contract SavingsGoal is Ownable {
 
         dai.transfer(owner(), goalBalance);
     }
+
+    // Fallback function to support random deposits of DAI token
+    receive() external payable {
+        require(msg.sender != address(0), "Invalid sender");
+        require(msg.value > 0, "No value sent");
+    }
 }
