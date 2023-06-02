@@ -25,6 +25,7 @@ contract SavingsGoal is Ownable {
     uint256 public immutable startTimestamp;
     uint256 public goalAmount;
     uint256 public daysToReachGoal;
+    uint256 private timeToReachGoal;
     string public goalName;
     string public goalDescription;
 
@@ -42,7 +43,8 @@ contract SavingsGoal is Ownable {
         );
         token = _token;
         goalAmount = _goalAmount;
-        daysToReachGoal = _daysToReachGoal * 1 days;
+        daysToReachGoal = _daysToReachGoal;
+        timeToReachGoal = _daysToReachGoal * 1 days;
         goalName = _goalName;
         goalDescription = _goalDescription;
 
@@ -53,14 +55,14 @@ contract SavingsGoal is Ownable {
         require(startTimestamp > 0, "Goal has not started yet");
 
         uint256 elapsedTime = block.timestamp - startTimestamp;
-        require(elapsedTime <= daysToReachGoal, "Goal period has ended");
+        require(elapsedTime <= timeToReachGoal, "Goal period has ended");
 
         IERC20 dai = IERC20(token);
 
         uint256 goalBalance = dai.balanceOf(address(this));
         require(goalBalance < goalAmount, "Goal has been reached");
 
-        uint256 amountToAdd = goalAmount / (daysToReachGoal / 1 days);
+        uint256 amountToAdd = goalAmount / daysToReachGoal;
         require(
             goalBalance + amountToAdd <= goalAmount,
             "Goal amount has already been reached"
