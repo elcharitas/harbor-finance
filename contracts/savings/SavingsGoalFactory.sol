@@ -201,4 +201,15 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
 
         delete allowedTokens[token];
     }
+
+    /**
+     * @notice toggle pause state of the factory
+     */
+    function togglePause() external onlyOwner {
+        if (paused()) {
+            _unpause();
+        } else {
+            _pause();
+        }
+    }
 }
