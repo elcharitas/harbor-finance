@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "./SavingsGoal.sol";
 
@@ -12,10 +13,10 @@ import "./SavingsGoal.sol";
  * It implements the Chainlink Keeper network to allow for automated funding/saving
  * @author elcharitas <jonathanirhodia@gmail.com> - https://links.dev/elcharitas
  */
-contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
-    address[] public allSavingsGoals;
+contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
+    address[] private allSavingsGoals;
 
-    address[] public allowedTokens;
+    mapping(address => bool) public allowedTokens;
 
     event SavingsGoalCreated(
         address indexed savingsGoal,
@@ -33,12 +34,7 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
      * @param token The address of the token to check
      */
     function isTokenAllowed(address token) public view returns (bool) {
-        for (uint256 i = 0; i < allowedTokens.length; i++) {
-            if (allowedTokens[i] == token) {
-                return true;
-            }
-        }
-        return false;
+        return allowedTokens[token];
     }
 
     /**
@@ -46,18 +42,37 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
      */
     function checkUpkeep(
         bytes memory /* checkData */
-    ) public view override returns (bool, bytes memory) {
-        if (allSavingsGoals.length == 0) {
+    ) public view override whenNotPaused returns (bool, bytes memory) {
+        uint256 batchSize = 100; // Define the batch size
+        uint256 savingsGoalsLength = allSavingsGoals.length;
+
+        if (savingsGoalsLength == 0) {
             return (false, "");
         }
-        for (uint256 i = 0; i < allSavingsGoals.length; i++) {
-            SavingsGoal savingsGoal = SavingsGoal(allSavingsGoals[i]);
-            if (
-                (block.timestamp - savingsGoal.startTimestamp()) % 1 days == 0
-            ) {
-                return (true, abi.encode(savingsGoal));
+
+        for (uint256 i = 0; i < savingsGoalsLength; i += batchSize) {
+            uint256 endIndex = i + batchSize > savingsGoalsLength
+                ? savingsGoalsLength
+                : i + batchSize;
+            address[] memory batch = new address[](endIndex - i);
+
+            for (uint256 j = i; j < endIndex; j++) {
+                SavingsGoal savingsGoal = SavingsGoal(
+                    payable(allSavingsGoals[j])
+                );
+                if (
+                    (block.timestamp - savingsGoal.startTimestamp()) % 1 days ==
+                    0
+                ) {
+                    batch[j - i] = address(savingsGoal);
+                }
+            }
+
+            if (batch.length > 0) {
+                return (true, abi.encode(batch));
             }
         }
+
         return (false, "");
     }
 
@@ -65,13 +80,18 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
      * @notice Performs the work on the contract, if instructed by :checkUpkeep():
      * @param performData The data returned by the checkData
      */
-    function performUpkeep(bytes calldata performData) external override {
-        SavingsGoal savingsGoal = SavingsGoal(
-            abi.decode(performData, (address))
-        );
+    function performUpkeep(
+        bytes calldata performData // bytes encoded array of savings goals
+    ) external override whenNotPaused {
+        // Decode the savings goals
+        address[] memory savingsGoals = abi.decode(performData, (address[]));
 
-        if (!savingsGoal.isGoalReached()) {
-            savingsGoal.addFunds();
+        for (uint256 i = 0; i < savingsGoals.length; i++) {
+            SavingsGoal savingsGoal = SavingsGoal(payable(savingsGoals[i]));
+
+            if (!savingsGoal.isGoalReached()) {
+                savingsGoal.addFunds();
+            }
         }
     }
 
@@ -89,7 +109,7 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
         uint256 daysToReachGoal,
         string memory goalName,
         string memory goalDescription
-    ) external {
+    ) external whenNotPaused {
         require(
             isTokenAllowed(daiToken),
             "Token is not allowed for savings goals"
@@ -126,12 +146,28 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
         address[] memory userSavingsGoals = new address[](
             allSavingsGoals.length
         );
-        uint256 counter = 0;
-        for (uint256 i = 0; i < allSavingsGoals.length; i++) {
-            SavingsGoal savingsGoal = SavingsGoal(allSavingsGoals[i]);
-            if (savingsGoal.owner() == msg.sender) {
-                userSavingsGoals[counter] = allSavingsGoals[i];
-                counter++;
+        uint256 savingsGoalsLength = allSavingsGoals.length;
+
+        assembly {
+            // Counter for the user savings goals
+            let counter := 0
+            for {
+                let i := 0
+            } lt(i, savingsGoalsLength) {
+                i := add(i, 1)
+            } {
+                // Get the savings goal
+                let savingsGoal := sload(add(allSavingsGoals.slot, i))
+                let savingsGoalOwner := sload(add(savingsGoal, 1))
+                // Check if the savings goal belongs to the caller
+                if eq(savingsGoalOwner, caller()) {
+                    // Add the savings goal to the array
+                    mstore(
+                        add(userSavingsGoals, add(counter, 0x20)),
+                        savingsGoal
+                    )
+                    counter := add(counter, 1)
+                }
             }
         }
         return userSavingsGoals;
@@ -148,7 +184,7 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
             !isTokenAllowed(token),
             "Token is already allowed for savings goals"
         );
-        allowedTokens.push(token);
+        allowedTokens[token] = true;
     }
 
     /**
@@ -163,12 +199,17 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable {
             "Token is not allowed for savings goals"
         );
 
-        for (uint256 i = 0; i < allowedTokens.length; i++) {
-            if (allowedTokens[i] == token) {
-                allowedTokens[i] = allowedTokens[allowedTokens.length - 1];
-                allowedTokens.pop();
-                break;
-            }
+        delete allowedTokens[token];
+    }
+
+    /**
+     * @notice toggle pause state of the factory
+     */
+    function togglePause() external onlyOwner {
+        if (paused()) {
+            _unpause();
+        } else {
+            _pause();
         }
     }
 }
