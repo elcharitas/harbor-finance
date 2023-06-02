@@ -60,7 +60,7 @@ contract SavingsGoal is Ownable {
         uint256 goalBalance = dai.balanceOf(address(this));
         require(goalBalance < goalAmount, "Goal has been reached");
 
-        uint256 amountToAdd = (goalAmount / daysToReachGoal / 1 days) * 1e18;
+        uint256 amountToAdd = goalAmount / (daysToReachGoal / 1 days);
         require(
             goalBalance + amountToAdd <= goalAmount,
             "Goal amount has already been reached"

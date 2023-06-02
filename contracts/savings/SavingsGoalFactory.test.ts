@@ -106,10 +106,52 @@ describe("SavingsGoalFactory", function () {
     expect(upkeepNeeded).to.be.true;
 
     const allSavingsGoals = await savingsGoalFactory.getAllSavingsGoals();
-    const performDataParsed = ethers.utils.defaultAbiCoder.decode(
+    const [performDataParsed] = ethers.utils.defaultAbiCoder.decode(
       ["address[]"],
       performData
+    ) as [string[]];
+    expect(performDataParsed[0]).to.equal(allSavingsGoals[0]);
+  });
+
+  it("should performUpkeep correctly", async function () {
+    const goalAmount = ethers.utils.parseEther("1000");
+    const expectedBalance = ethers.utils.parseEther("100");
+    const daysToReachGoal = 10;
+    const goalName = "New Laptop";
+    const goalDescription = "Save up for a new laptop";
+
+    await savingsGoalFactory.connect(owner).addToken(daiToken.address);
+
+    await savingsGoalFactory
+      .connect(owner)
+      .createSavingsGoal(
+        daiToken.address,
+        goalAmount,
+        daysToReachGoal,
+        goalName,
+        goalDescription
+      );
+
+    const [upkeepNeeded, performData] = await savingsGoalFactory.checkUpkeep(
+      "0x"
     );
-    expect(performDataParsed[0][0]).to.equal(allSavingsGoals[0]);
+    expect(upkeepNeeded).to.be.true;
+
+    const [performDataParsed] = ethers.utils.defaultAbiCoder.decode(
+      ["address[]"],
+      performData
+    ) as [string[]];
+    const goal = performDataParsed[0];
+    const goalContract = await ethers.getContractAt("SavingsGoal", goal);
+
+    // allow the goal contract to transfer dai
+    await daiToken.connect(owner).approve(goal, goalAmount);
+
+    expect(await goalContract.isGoalReached()).to.be.false;
+
+    await savingsGoalFactory.performUpkeep(performData);
+
+    const balance = await goalContract.balanceOf();
+    expect(balance).to.equal(expectedBalance);
   });
 });
