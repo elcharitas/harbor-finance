@@ -20,7 +20,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         modalSize="compact"
         appInfo={{
           appName: CONFIG.APP.NAME,
-          learnMoreUrl: "/docs/wallets",
+          learnMoreUrl: "/docs#wallets",
         }}
         avatar={({ ensImage, address }) => (
           <Avatar name={address} src={ensImage ?? address} />
