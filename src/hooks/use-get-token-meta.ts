@@ -24,13 +24,15 @@ export function useGetTokensMeta({
   tokens,
 }: TokenMetaOptions): TokenMetaResult {
   const { data, isLoading, isError } = useContractReads({
-    contracts: META_INFO_FUNCTIONS.flatMap((functionName) =>
-      tokens?.map((address) => ({
-        address,
-        abi: TDaiData.abi as never,
-        functionName,
-      }))
-    ),
+    contracts: tokens
+      ? META_INFO_FUNCTIONS.flatMap((functionName) =>
+          tokens?.map((address) => ({
+            address,
+            abi: TDaiData.abi as never,
+            functionName,
+          }))
+        )
+      : [],
   });
 
   const tokenInfo = tokens?.map((address, index) => ({
