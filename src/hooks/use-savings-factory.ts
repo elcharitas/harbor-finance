@@ -5,8 +5,9 @@ import { SavingsGoalFactory } from "@contract-types/index";
 import { ContractMeta, ContractResult } from "./types";
 
 export function useSavingsFactoryRead<
-  K extends keyof SavingsGoalFactory,
-  D extends SavingsGoalFactory[K]
+  R extends ContractResult<D>,
+  K extends keyof SavingsGoalFactory = keyof SavingsGoalFactory,
+  D extends SavingsGoalFactory[K] = SavingsGoalFactory[K]
 >({ functionName, args }: ContractMeta<K, D>) {
   const { data, ...rest } = useContractRead({
     address: CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY,
@@ -15,12 +16,13 @@ export function useSavingsFactoryRead<
     args,
   });
 
-  return { data: data as ContractResult<D>, ...rest };
+  return { data: data as R, ...rest };
 }
 
 export function useSavingsFactoryWrite<
-  K extends keyof SavingsGoalFactory,
-  D extends SavingsGoalFactory[K]
+  R extends ContractResult<D>,
+  K extends keyof SavingsGoalFactory = keyof SavingsGoalFactory,
+  D extends SavingsGoalFactory[K] = SavingsGoalFactory[K]
 >({ functionName, args }: ContractMeta<K, D>) {
   const { data, ...rest } = useContractWrite({
     address: CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY,
@@ -29,5 +31,5 @@ export function useSavingsFactoryWrite<
     args,
   });
 
-  return { data: data as ContractResult<D>, ...rest };
+  return { data: data as R, ...rest };
 }

@@ -5,8 +5,9 @@ import { SavingsGoal } from "@contract-types/index";
 import { ContractMeta, ContractResult } from "./types";
 
 export function useSavings<
-  K extends keyof SavingsGoal,
-  D extends SavingsGoal[K]
+  R extends ContractResult<D>,
+  K extends keyof SavingsGoal = keyof SavingsGoal,
+  D extends SavingsGoal[K] = SavingsGoal[K]
 >(
   address: typeof CONFIG["CONTRACTS"]["SAVINGS_GOAL_FACTORY"],
   { functionName, args }: ContractMeta<K, D>
@@ -18,5 +19,5 @@ export function useSavings<
     args,
   });
 
-  return { data: data as ContractResult<D>, ...rest };
+  return { data: data as R, ...rest };
 }

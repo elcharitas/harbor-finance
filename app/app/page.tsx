@@ -29,12 +29,10 @@ import { ContractAddress } from "src/hooks/types";
 
 const App: NextPage = () => {
   const disclosure = useDisclosure();
-  const { data: tokens } = useSavingsFactoryRead({
+  const { data: tokens } = useSavingsFactoryRead<ContractAddress[]>({
     functionName: "getAllAllowedTokens",
   });
-  const { data: tokensList } = useGetTokensMeta({
-    tokens: tokens as ContractAddress[],
-  });
+  const { data: tokensList } = useGetTokensMeta({ tokens });
 
   return (
     <Section height="calc(100vh - 200px)" p="0">
