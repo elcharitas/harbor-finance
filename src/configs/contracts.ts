@@ -1,5 +1,5 @@
 const CONTRACTS_CONFIG: Record<string, `0x${string}`> = {
-  SAVINGS_GOAL_FACTORY: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  SAVINGS_GOAL_FACTORY: process.env.NEXT_PUBLIC_SAVINGS_GOAL_FACTORY_ADDRESS as `0x${string}`,
 };
 
 export default CONTRACTS_CONFIG;

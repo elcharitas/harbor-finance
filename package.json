@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "yarn deploy && next dev",
     "build": "next build",
     "build:contracts": "hardhat compile",
     "start": "next start",
+    "start:node": "hardhat node",
     "lint": "next lint",
+    "deploy": "hardhat run scripts/deploy-factory.ts --network localhost",
     "test:contracts": "hardhat test"
   },
   "dependencies": {

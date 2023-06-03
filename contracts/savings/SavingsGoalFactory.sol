@@ -15,8 +15,9 @@ import "./SavingsGoal.sol";
  */
 contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
     address[] private allSavingsGoals;
+    address[] private allAllowedTokens;
 
-    mapping(address => bool) public allowedTokens;
+    mapping(address => uint256) private allowedTokens;
 
     event SavingsGoalCreated(
         address indexed savingsGoal,
@@ -34,7 +35,7 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
      * @param token The address of the token to check
      */
     function isTokenAllowed(address token) public view returns (bool) {
-        return allowedTokens[token];
+        return allowedTokens[token] > 0;
     }
 
     /**
@@ -140,6 +141,13 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
     }
 
     /**
+     * @notice Gets all the tokens allowed for savings goals
+     */
+    function getAllAllowedTokens() external view returns (address[] memory) {
+        return allAllowedTokens;
+    }
+
+    /**
      * @notice Gets all the savings goals created by a user
      */
     function getUserSavingsGoals() external view returns (address[] memory) {
@@ -184,7 +192,8 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
             !isTokenAllowed(token),
             "Token is already allowed for savings goals"
         );
-        allowedTokens[token] = true;
+        allAllowedTokens.push(token);
+        allowedTokens[token] = allAllowedTokens.length;
     }
 
     /**
@@ -198,6 +207,12 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
             isTokenAllowed(token),
             "Token is not allowed for savings goals"
         );
+
+        uint256 tokenIndex = allowedTokens[token] - 1;
+        allAllowedTokens[tokenIndex] = allAllowedTokens[
+            allAllowedTokens.length - 1
+        ];
+        allAllowedTokens.pop();
 
         delete allowedTokens[token];
     }

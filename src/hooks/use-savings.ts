@@ -1,26 +1,44 @@
-import { useContractRead } from "wagmi";
-import CONFIG from "src/configs";
-import { abi as SavingsGoalAbi } from "@contracts/savings/SavingsGoal.sol/SavingsGoal.json";
+import { useContractReads } from "wagmi";
+import SavingsGoalData from "@contracts/savings/SavingsGoal.sol/SavingsGoal.json";
 import { SavingsGoal } from "@contract-types/index";
+import { ContractAddress, ContractMeta, ContractResult } from "./types";
 
-interface SavingsMeta<K, D> {
-  functionName: K;
-  args?: D extends (...args: any[]) => any ? Parameters<D> : unknown[];
-}
+type MappedContractResult<K extends keyof SavingsGoal> = {
+  [key in K]: ContractResult<SavingsGoal[key]>;
+};
+
+type SavingsInfo<K extends keyof SavingsGoal> = MappedContractResult<K> & {
+  address: ContractAddress;
+};
 
 export function useSavings<
-  K extends keyof SavingsGoal,
-  D extends SavingsGoal[K]
->(
-  address: typeof CONFIG["CONTRACTS"]["SAVINGS_GOAL_FACTORY"],
-  { functionName, args }: SavingsMeta<K, D>
-) {
-  const savingsContract = useContractRead({
-    address,
-    abi: SavingsGoalAbi,
-    functionName,
-    args,
+  K extends keyof SavingsGoal = keyof SavingsGoal,
+  D extends SavingsGoal[K] = SavingsGoal[K]
+>(addresses: ContractAddress[] | undefined, metaList: ContractMeta<K, D>[]) {
+  const { data, ...rest } = useContractReads({
+    // @ts-expect-error We're inferring the type for args
+    contracts: addresses?.flatMap((address) =>
+      metaList.map((meta) => ({
+        ...meta,
+        address,
+        abi: SavingsGoalData.abi as never,
+      }))
+    ),
   });
 
-  return savingsContract;
+  const savingsInfo = addresses?.map(
+    (address, index) =>
+      ({
+        address,
+        ...metaList.reduce(
+          (accMeta, meta, mIndex) => ({
+            ...accMeta,
+            [meta.functionName]: data?.[index + mIndex].result,
+          }),
+          {}
+        ),
+      } as SavingsInfo<typeof metaList[number]["functionName"]>)
+  );
+
+  return { data: savingsInfo, ...rest };
 }
