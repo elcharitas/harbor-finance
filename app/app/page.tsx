@@ -18,6 +18,7 @@ import {
   SelectList,
   SubmitButton,
 } from "@saas-ui/react";
+import { FiPlusSquare } from "react-icons/fi";
 
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
 import { PageTransition } from "src/components/motion/page-transition";
@@ -58,7 +59,7 @@ const App: NextPage = () => {
                   0.00
                 </Text>
                 <Select
-                  name="country"
+                  name="token"
                   defaultValue={tokensList?.[0].address}
                   options={tokensList?.map((token) => ({
                     label: token.symbol,
@@ -78,10 +79,10 @@ const App: NextPage = () => {
             <Button
               variant="primary"
               size="md"
-              px="6"
               onClick={disclosure.onOpen}
+              leftIcon={<FiPlusSquare />}
             >
-              Withdraw
+              New Savings
             </Button>
           </ButtonGroup>
         </HStack>
@@ -90,7 +91,7 @@ const App: NextPage = () => {
           <Features
             features={[
               {
-                title: "Investments",
+                title: "Saving Goals",
                 description: "",
                 delay: 0.6,
               },
