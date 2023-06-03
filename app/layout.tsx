@@ -1,6 +1,7 @@
 import { Lato } from "next/font/google";
 import { Layout } from "src/components/layout";
 import AppProvider from "src/providers/app/provider";
+import CONFIG from "src/configs";
 
 const font = Lato({
   subsets: ["latin"],
@@ -22,7 +23,9 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={font.className}>
+      <body
+        className={`${font.className} chakra-ui-${CONFIG.APP.INITIAL_COLOR_MODE}`}
+      >
         <AppProvider>
           <Layout headerProps={{}} footerProps={{}}>
             {children}

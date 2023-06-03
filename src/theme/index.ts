@@ -1,5 +1,6 @@
 import { extendTheme } from "@chakra-ui/react";
 import { theme } from "@saas-ui/react";
+import CONFIG from "src/configs";
 
 import components from "./components";
 import { fontSizes } from "./foundations/typography";
@@ -24,7 +25,7 @@ const styles = {
 export default extendTheme(
   {
     config: {
-      initialColorMode: "dark",
+      initialColorMode: CONFIG.APP.INITIAL_COLOR_MODE,
       useSystemColorMode: false,
     },
     styles,
