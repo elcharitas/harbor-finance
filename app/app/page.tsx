@@ -1,13 +1,20 @@
 "use client";
 import { useState } from "react";
 import { NextPage } from "next";
+import { Line } from "react-chartjs-2";
+import {
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Chart,
+} from "chart.js";
 import {
   Box,
   Button,
   ButtonGroup,
   HStack,
   ModalFooter,
-  Stack,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -22,6 +29,7 @@ import {
   SubmitButton,
 } from "@saas-ui/react";
 import { FiPlusSquare } from "react-icons/fi";
+import AggregatorV3Interface from "@chainlink/contracts/abi/v0.8/AggregatorV3Interface.json";
 
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
 import { PageTransition } from "src/components/motion/page-transition";
@@ -30,6 +38,11 @@ import { Feature, Features } from "src/components/features";
 import { useSavingsFactoryRead, useSavings } from "src/hooks/common";
 import { useGetTokensMeta } from "src/hooks/use-get-token-meta";
 import { ContractAddress } from "src/hooks/types";
+
+Chart.register(CategoryScale);
+Chart.register(LinearScale);
+Chart.register(PointElement);
+Chart.register(LineElement);
 
 const App: NextPage = () => {
   const disclosure = useDisclosure();
@@ -69,10 +82,10 @@ const App: NextPage = () => {
   }, 0);
 
   return (
-    <Section height="calc(100vh - 200px)" p="0">
+    <Section p="0">
       <BackgroundGradient zIndex="-1" />
 
-      <Stack height="100%" py="20">
+      <Box pt="20">
         <HStack
           gap="4"
           alignItems={{ base: "flex-end", md: "center" }}
@@ -141,7 +154,7 @@ const App: NextPage = () => {
               {
                 title: "Saving Goals",
                 description: (
-                  <Box overflowX="scroll">
+                  <Box pt={4} overflowX="scroll">
                     <DataTable
                       columns={[
                         {
@@ -169,7 +182,35 @@ const App: NextPage = () => {
               },
               {
                 title: "Goals Tracker",
-                description: "",
+                description: (
+                  <Box pt={4}>
+                    <Line
+                      height={350}
+                      data={{
+                        labels: [
+                          "January",
+                          "February",
+                          "March",
+                          "April",
+                          "May",
+                          "June",
+                          "July",
+                        ],
+                        datasets: [
+                          {
+                            label: "My First dataset",
+                            fill: false,
+                            backgroundColor: "rgba(75,192,192,0.4)",
+                            borderColor: "rgba(75,192,192,1)",
+                            borderCapStyle: "butt",
+                            borderDash: [],
+                            data: [65, 59, 80, 81, 56, 55, 40],
+                          },
+                        ],
+                      }}
+                    />
+                  </Box>
+                ),
                 delay: 0.8,
               },
             ]}
@@ -188,7 +229,7 @@ const App: NextPage = () => {
             mx="0"
           />
         </PageTransition>
-      </Stack>
+      </Box>
       <FormDialog
         title=" "
         onSubmit={() => null}
