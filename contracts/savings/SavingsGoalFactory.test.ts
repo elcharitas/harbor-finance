@@ -151,7 +151,7 @@ describe("SavingsGoalFactory", function () {
 
     await savingsGoalFactory.performUpkeep(performData);
 
-    const balance = await goalContract.balanceOf();
+    const balance = await goalContract.balance();
     expect(balance).to.equal(expectedBalance);
   });
 });
