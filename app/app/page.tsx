@@ -23,9 +23,18 @@ import { BackgroundGradient } from "src/components/gradients/background-gradient
 import { PageTransition } from "src/components/motion/page-transition";
 import { Section } from "src/components/section";
 import { Feature, Features } from "src/components/features";
+import { useSavingsFactoryRead } from "src/hooks/use-savings-factory";
+import { useGetTokensMeta } from "src/hooks/use-get-token-meta";
+import { ContractAddress } from "src/hooks/types";
 
 const App: NextPage = () => {
   const disclosure = useDisclosure();
+  const { data: tokens } = useSavingsFactoryRead({
+    functionName: "getAllAllowedTokens",
+  });
+  const { data: tokensList } = useGetTokensMeta({
+    tokens: tokens as ContractAddress[],
+  });
 
   return (
     <Section height="calc(100vh - 200px)" p="0">
@@ -52,11 +61,11 @@ const App: NextPage = () => {
                 </Text>
                 <Select
                   name="country"
-                  defaultValue="nl"
-                  options={[
-                    { label: "USDC", value: "nl" },
-                    { label: "BUSD", value: "us" },
-                  ]}
+                  defaultValue={tokensList?.[0].address}
+                  options={tokensList?.map((token) => ({
+                    label: token.symbol,
+                    value: token.address,
+                  }))}
                 >
                   <SelectButton />
                   <SelectList fontSize="sm" />
