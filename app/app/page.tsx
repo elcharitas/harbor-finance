@@ -1,6 +1,8 @@
 "use client";
+import { useState } from "react";
 import { NextPage } from "next";
 import {
+  Box,
   Button,
   ButtonGroup,
   HStack,
@@ -10,6 +12,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import {
+  DataTable,
   Field,
   FormDialog,
   FormLayout,
@@ -24,16 +27,46 @@ import { BackgroundGradient } from "src/components/gradients/background-gradient
 import { PageTransition } from "src/components/motion/page-transition";
 import { Section } from "src/components/section";
 import { Feature, Features } from "src/components/features";
-import { useSavingsFactoryRead } from "src/hooks/use-savings-factory";
+import { useSavingsFactoryRead, useSavings } from "src/hooks/common";
 import { useGetTokensMeta } from "src/hooks/use-get-token-meta";
 import { ContractAddress } from "src/hooks/types";
 
 const App: NextPage = () => {
   const disclosure = useDisclosure();
+  const [selectedToken, setSelectedToken] = useState<ContractAddress | null>(
+    null
+  );
   const { data: tokens } = useSavingsFactoryRead<ContractAddress[]>({
     functionName: "getAllAllowedTokens",
   });
+  const { data: userSavingsGoals } = useSavingsFactoryRead<ContractAddress[]>({
+    functionName: "getUserSavingsGoals",
+  });
   const { data: tokensList } = useGetTokensMeta({ tokens });
+  const { data: savingsList } = useSavings(userSavingsGoals, [
+    {
+      functionName: "goalAmount",
+    },
+    {
+      functionName: "daysToReachGoal",
+    },
+    {
+      functionName: "balanceOf",
+    },
+    {
+      functionName: "goalName",
+    },
+    {
+      functionName: "getRemainingAmount",
+    },
+  ]);
+
+  const totalBalance = savingsList.reduce((total, saving) => {
+    const selectedAddress = selectedToken || tokensList?.[0].address;
+    return saving.address === selectedAddress
+      ? total + saving.balanceOf.toNumber()
+      : total;
+  }, 0);
 
   return (
     <Section height="calc(100vh - 200px)" p="0">
@@ -56,7 +89,11 @@ const App: NextPage = () => {
                   fontWeight="bolder"
                   cursor="pointer"
                 >
-                  0.00
+                  {new Intl.NumberFormat("en-US", {
+                    style: "decimal",
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 2,
+                  }).format(totalBalance)}
                 </Text>
                 <Select
                   name="token"
@@ -65,6 +102,9 @@ const App: NextPage = () => {
                     label: token.symbol,
                     value: token.address,
                   }))}
+                  onChange={(value) =>
+                    setSelectedToken(value as ContractAddress)
+                  }
                 >
                   <SelectButton />
                   <SelectList fontSize="sm" />
@@ -92,11 +132,36 @@ const App: NextPage = () => {
             features={[
               {
                 title: "Saving Goals",
-                description: "",
+                description: (
+                  <Box overflowX="auto">
+                    <DataTable
+                      columns={[
+                        {
+                          header: "Name",
+                          accessorKey: "goalName",
+                        },
+                        {
+                          header: "Token",
+                          accessorKey: "address",
+                        },
+                        {
+                          header: "Target",
+                          accessorKey: "goalAmount",
+                        },
+                        {
+                          header: "Timeline",
+                          accessorKey: "daysToReachGoal",
+                        },
+                      ]}
+                      data={savingsList}
+                      isSelectable
+                    />
+                  </Box>
+                ),
                 delay: 0.6,
               },
               {
-                title: "Wallet Balance",
+                title: "Goals Tracker",
                 description: "",
                 delay: 0.8,
               },
