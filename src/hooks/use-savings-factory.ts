@@ -1,37 +1,33 @@
 import { useContractRead, useContractWrite } from "wagmi";
 import CONFIG from "src/configs";
-import { abi as SavingsGoalFactoryAbi } from "@contracts/savings/SavingsGoalFactory.sol/SavingsGoalFactory.json";
+import SavingsGoalFactoryData from "@contracts/savings/SavingsGoalFactory.sol/SavingsGoalFactory.json";
 import { SavingsGoalFactory } from "@contract-types/index";
-
-interface SavingsFactoryMeta<K, D> {
-  functionName: K;
-  args?: D extends (...args: any[]) => any ? Parameters<D> : unknown[];
-}
+import { ContractMeta, ContractResult } from "./types";
 
 export function useSavingsFactoryRead<
   K extends keyof SavingsGoalFactory,
   D extends SavingsGoalFactory[K]
->({ functionName, args }: SavingsFactoryMeta<K, D>) {
-  const savingsFactoryContract = useContractRead({
+>({ functionName, args }: ContractMeta<K, D>) {
+  const { data, ...rest } = useContractRead({
     address: CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY,
-    abi: SavingsGoalFactoryAbi,
+    abi: SavingsGoalFactoryData.abi,
     functionName,
     args,
   });
 
-  return savingsFactoryContract;
+  return { data: data as ContractResult<D>, ...rest };
 }
 
 export function useSavingsFactoryWrite<
   K extends keyof SavingsGoalFactory,
   D extends SavingsGoalFactory[K]
->({ functionName, args }: SavingsFactoryMeta<K, D>) {
-  const savingsFactoryContract = useContractWrite({
+>({ functionName, args }: ContractMeta<K, D>) {
+  const { data, ...rest } = useContractWrite({
     address: CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY,
-    abi: SavingsGoalFactoryAbi,
+    abi: SavingsGoalFactoryData.abi,
     functionName,
     args,
   });
 
-  return savingsFactoryContract;
+  return { data: data as ContractResult<D>, ...rest };
 }

@@ -2,25 +2,21 @@ import { useContractRead } from "wagmi";
 import CONFIG from "src/configs";
 import { abi as SavingsGoalAbi } from "@contracts/savings/SavingsGoal.sol/SavingsGoal.json";
 import { SavingsGoal } from "@contract-types/index";
-
-interface SavingsMeta<K, D> {
-  functionName: K;
-  args?: D extends (...args: any[]) => any ? Parameters<D> : unknown[];
-}
+import { ContractMeta, ContractResult } from "./types";
 
 export function useSavings<
   K extends keyof SavingsGoal,
   D extends SavingsGoal[K]
 >(
   address: typeof CONFIG["CONTRACTS"]["SAVINGS_GOAL_FACTORY"],
-  { functionName, args }: SavingsMeta<K, D>
+  { functionName, args }: ContractMeta<K, D>
 ) {
-  const savingsContract = useContractRead({
+  const { data, ...rest } = useContractRead({
     address,
     abi: SavingsGoalAbi,
     functionName,
     args,
   });
 
-  return savingsContract;
+  return { data: data as ContractResult<D>, ...rest };
 }
