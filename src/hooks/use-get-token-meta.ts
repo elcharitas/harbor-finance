@@ -26,7 +26,7 @@ export function useGetTokensMeta({
   const { data, isLoading, isError } = useContractReads({
     contracts: tokens
       ? META_INFO_FUNCTIONS.flatMap((functionName) =>
-          tokens?.map((address) => ({
+          tokens.map((address) => ({
             address,
             abi: TDaiData.abi as never,
             functionName,

@@ -61,7 +61,7 @@ const App: NextPage = () => {
     },
   ]);
 
-  const totalBalance = savingsList.reduce((total, saving) => {
+  const totalBalance = savingsList?.reduce((total, saving) => {
     const selectedAddress = selectedToken || tokensList?.[0].address;
     return saving.address === selectedAddress
       ? total + saving.balanceOf.toNumber()
@@ -93,7 +93,7 @@ const App: NextPage = () => {
                     style: "decimal",
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 2,
-                  }).format(totalBalance)}
+                  }).format(totalBalance ?? 0)}
                 </Text>
                 <Select
                   name="token"
@@ -153,7 +153,7 @@ const App: NextPage = () => {
                           accessorKey: "daysToReachGoal",
                         },
                       ]}
-                      data={savingsList}
+                      data={savingsList ?? []}
                       isSelectable
                     />
                   </Box>

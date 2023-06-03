@@ -14,10 +14,10 @@ type SavingsInfo<K extends keyof SavingsGoal> = MappedContractResult<K> & {
 export function useSavings<
   K extends keyof SavingsGoal = keyof SavingsGoal,
   D extends SavingsGoal[K] = SavingsGoal[K]
->(addresses: ContractAddress[], metaList: ContractMeta<K, D>[]) {
+>(addresses: ContractAddress[] | undefined, metaList: ContractMeta<K, D>[]) {
   const { data, ...rest } = useContractReads({
     // @ts-expect-error We're inferring the type for args
-    contracts: addresses.flatMap((address) =>
+    contracts: addresses?.flatMap((address) =>
       metaList.map((meta) => ({
         ...meta,
         address,
@@ -26,7 +26,7 @@ export function useSavings<
     ),
   });
 
-  const savingsInfo = addresses.map(
+  const savingsInfo = addresses?.map(
     (address, index) =>
       ({
         address,
