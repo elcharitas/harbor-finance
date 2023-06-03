@@ -1,0 +1,17 @@
+[Log]
+Level = 'warn'
+
+[WebServer]
+AllowOrigins = '*'
+SecureCookies = false
+
+[WebServer.TLS]
+HTTPSPort = 0
+
+[[EVM]]
+ChainID = '31337'
+
+[[EVM.Nodes]]
+Name = 'Hardhat'
+WSURL = 'wss://CHANGE_ME'
+HTTPURL = 'http://127.0.0.1:8545'
