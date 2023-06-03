@@ -34,16 +34,24 @@ describe("SavingsGoal", function () {
     await daiToken.connect(owner).approve(savingsGoal.address, goalAmount);
   });
 
-  describe("Ownership", function () {
+  describe(".owner()", function () {
     it("should set the right owner", async function () {
       expect(await savingsGoal.owner()).to.equal(owner.address);
     });
   });
 
-  describe("Transactions", function () {
+  describe(".addFunds()", function () {
     it("should allow funding to the goal", async function () {
       await savingsGoal.addFunds();
       expect(await savingsGoal.balance()).to.be.greaterThan(0);
+    });
+  });
+
+  describe(".withdraw()", function () {
+    it("should revert if not called by the owner", async function () {
+      expect(savingsGoal.connect(signers[0]).withdraw()).to.be.revertedWith(
+        "Ownable: caller is not the owner"
+      );
     });
 
     it("should not withdraw from a savings goal if not reached", async function () {
