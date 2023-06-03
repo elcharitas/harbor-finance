@@ -29,6 +29,12 @@ contract SavingsGoal is Ownable {
     string public goalName;
     string public goalDescription;
 
+    event SavingsGoalFunded(
+        address indexed savingsGoal,
+        address indexed funder,
+        uint256 amount
+    );
+
     constructor(
         address _token,
         uint256 _goalAmount,
@@ -69,20 +75,22 @@ contract SavingsGoal is Ownable {
         );
 
         dai.transferFrom(owner(), address(this), amountToAdd);
+
+        emit SavingsGoalFunded(address(this), msg.sender, amountToAdd);
     }
 
-    function getRemainingAmount() external view returns (uint256) {
-        return goalAmount - balanceOf();
+    function remainingAmount() external view returns (uint256) {
+        return goalAmount - balance();
     }
 
     function isGoalReached() external view returns (bool) {
-        return balanceOf() >= goalAmount;
+        return balance() >= goalAmount;
     }
 
     /**
      * @notice Returns the balance of the contract
      */
-    function balanceOf() public view returns (uint256) {
+    function balance() public view returns (uint256) {
         IERC20 dai = IERC20(token);
         return dai.balanceOf(address(this));
     }
@@ -95,7 +103,7 @@ contract SavingsGoal is Ownable {
         IERC20 dai = IERC20(token);
         uint256 goalBalance = dai.balanceOf(address(this));
 
-        require(goalAmount >= goalBalance, "Goal not reached");
+        require(goalBalance >= goalAmount, "Goal not reached");
 
         dai.transfer(owner(), goalBalance);
     }
@@ -104,5 +112,7 @@ contract SavingsGoal is Ownable {
     receive() external payable {
         require(msg.sender != address(0), "Invalid sender");
         require(msg.value > 0, "No value sent");
+
+        emit SavingsGoalFunded(address(this), msg.sender, msg.value);
     }
 }

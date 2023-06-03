@@ -51,20 +51,20 @@ const App: NextPage = () => {
       functionName: "daysToReachGoal",
     },
     {
-      functionName: "balanceOf",
+      functionName: "balance",
     },
     {
       functionName: "goalName",
     },
     {
-      functionName: "getRemainingAmount",
+      functionName: "remainingAmount",
     },
   ]);
 
   const totalBalance = savingsList?.reduce((total, saving) => {
     const selectedAddress = selectedToken || tokensList?.[0].address;
     return saving.address === selectedAddress
-      ? total + saving.balanceOf.toNumber()
+      ? total + saving.balance.toNumber()
       : total;
   }, 0);
 
@@ -72,12 +72,13 @@ const App: NextPage = () => {
     <Section height="calc(100vh - 200px)" p="0">
       <BackgroundGradient zIndex="-1" />
 
-      <Stack height="100%" pt="20">
+      <Stack height="100%" py="20">
         <HStack
-          alignItems="center"
+          gap="4"
+          alignItems={{ base: "flex-end", md: "center" }}
           justifyContent="space-between"
-          px="12"
-          mt="24"
+          px={{ base: "4", md: "12" }}
+          mt={{ base: "8", md: "24" }}
         >
           <Feature
             title="Earnings"
@@ -113,7 +114,14 @@ const App: NextPage = () => {
             }
           />
           <ButtonGroup>
-            <Button variant="outline" size="md" px="6">
+            <Button
+              title="Coming soon"
+              variant="outline"
+              size="md"
+              px="6"
+              display={{ base: "none", md: "block" }}
+              isDisabled
+            >
               Borrow
             </Button>
             <Button
@@ -133,7 +141,7 @@ const App: NextPage = () => {
               {
                 title: "Saving Goals",
                 description: (
-                  <Box overflowX="auto">
+                  <Box overflowX="scroll">
                     <DataTable
                       columns={[
                         {
@@ -154,7 +162,6 @@ const App: NextPage = () => {
                         },
                       ]}
                       data={savingsList ?? []}
-                      isSelectable
                     />
                   </Box>
                 ),
