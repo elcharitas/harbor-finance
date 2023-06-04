@@ -29,7 +29,6 @@ import {
   SubmitButton,
 } from "@saas-ui/react";
 import { FiPlusSquare } from "react-icons/fi";
-import AggregatorV3Interface from "@chainlink/contracts/abi/v0.8/AggregatorV3Interface.json";
 
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
 import { PageTransition } from "src/components/motion/page-transition";
@@ -47,9 +46,10 @@ Chart.register(LineElement);
 
 const App: NextPage = () => {
   const disclosure = useDisclosure();
-  const [selectedToken, setSelectedToken] = useState<ContractAddress | null>(
-    null
-  );
+  const [selectedToken, setSelectedToken] = useState<{
+    symbol: string;
+    address: ContractAddress;
+  } | null>(null);
   const { data: tokens } = useSavingsFactoryRead<ContractAddress[]>({
     functionName: "getAllAllowedTokens",
   });
@@ -74,26 +74,16 @@ const App: NextPage = () => {
       functionName: "remainingAmount",
     },
   ]);
-  const { data: referenceDataFeeds } = useFetch<
-    Record<"contractAddress" | "name", string>[]
-  >("https://reference-data-directory.vercel.app/feeds-matic-testnet.json");
   const { data: chainlinkPriceFeeds } = useFetch<Record<string, number[]>>(
-    `/api/aggregator?contract=${
-      referenceDataFeeds?.find((feed) =>
-        feed.name.match(
-          new RegExp(
-            tokensList?.find(({ address }) => address === selectedToken)
-              ?.symbol ?? "Dai",
-            "i"
-          )
-        )
-      )?.contractAddress
+    `/api/aggregator?days=7&contract=${
+      tokensList?.find(({ address }) => address === selectedToken?.address)
+        ?.symbol || "Dai"
     }`
   );
 
   const totalBalance = savingsList?.reduce((total, saving) => {
-    const selectedAddress = selectedToken || tokensList?.[0].address;
-    return saving.address === selectedAddress
+    const { address } = (selectedToken || tokensList?.[0]) ?? {};
+    return saving.address === address
       ? total + saving.balance.toNumber()
       : total;
   }, 0);
@@ -134,7 +124,14 @@ const App: NextPage = () => {
                     value: token.address,
                   }))}
                   onChange={(value) =>
-                    setSelectedToken(value as ContractAddress)
+                    setSelectedToken({
+                      symbol:
+                        tokensList?.find(
+                          ({ address }) =>
+                            address === (value as ContractAddress)
+                        )?.symbol ?? "",
+                      address: value as ContractAddress,
+                    })
                   }
                 >
                   <SelectButton />
@@ -213,7 +210,10 @@ const App: NextPage = () => {
                             borderColor: "rgba(75,192,192,1)",
                             borderCapStyle: "butt",
                             borderDash: [],
-                            data: Object.values(chainlinkPriceFeeds ?? {}),
+                            data: [
+                              0,
+                              ...Object.values(chainlinkPriceFeeds ?? {}),
+                            ],
                           },
                         ],
                       }}

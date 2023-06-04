@@ -1,49 +1,43 @@
 import { NextResponse } from "next/server";
-import AggregatorV3Abi from "@chainlink/contracts/abi/v0.8/AggregatorV3Interface.json";
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import CONFIG from "src/configs";
+import {
+  AggregatorV3Interface,
+  fetchHistoricalData,
+  getContractAddress,
+  provider,
+} from "src/utils/chainlink";
 
-const AggregatorV3Interface = new ethers.utils.Interface(AggregatorV3Abi);
-const provider = new ethers.providers.JsonRpcProvider(CONFIG.NETWORK.RPC_URL);
-
-/**
- * This piece of code converts a big number to number
- * @author elcharitas <https://iamelcharitas.hashnode.dev/how-to-safely-convert-bignumbers-with-ethers>
- *
- * @param bigNumber
- * @param unit
- */
-function toNumber(bigNumber: BigNumber, unit: string | number = "wei") {
-  return Number(ethers.utils.formatUnits(bigNumber, unit));
-}
-
-async function getRoundData(contract: ethers.Contract, roundId: BigNumber) {
-  const roundData = await contract.getRoundData(roundId);
-  return {
-    answer: roundData.answer,
-    updatedAt: toNumber(roundData.updatedAt),
-  };
-}
-
-/**
- * This is a route handler which uses the QuickNode RPC Url and chainlink contracts to
- * access and return the historical price data of a stable coin aggregator
- *
- * @param request
- */
 export async function GET(request: Request) {
+  if (CONFIG.APP.IS_DEV) {
+    return NextResponse.json({});
+  }
+
   const routeUrl = new URL(request.url);
 
-  const contractAddress = routeUrl.searchParams.get("contract");
+  const contractSymbol = routeUrl.searchParams.get("contract");
   const days = Number(routeUrl.searchParams.get("days") || "1");
 
-  if (!contractAddress) {
+  if (!contractSymbol) {
     return NextResponse.json(
       {
-        error: "Please specify contract address",
+        error: "Please specify contract symbol. E.g DAI",
       },
       {
         status: 400,
+      }
+    );
+  }
+
+  const proxyAddress = await getContractAddress(contractSymbol);
+
+  if (!proxyAddress) {
+    return NextResponse.json(
+      {
+        error: "Contract not found.",
+      },
+      {
+        status: 404,
       }
     );
   }
@@ -52,32 +46,12 @@ export async function GET(request: Request) {
   const startTime = endTime - 86400 * days;
 
   const contract = new ethers.Contract(
-    contractAddress,
+    proxyAddress,
     AggregatorV3Interface,
     provider
   );
-  const latestRoundData = await contract.latestRoundData();
-  let roundId = latestRoundData.roundId as BigNumber;
 
-  const result = [latestRoundData.answer];
-  let timestamp = toNumber(latestRoundData.updatedAt);
-
-  const dataByDate: Record<string, number[]> = {};
-
-  while (timestamp > startTime) {
-    roundId = roundId.sub(BigNumber.from(1));
-    const roundData = await getRoundData(contract, roundId);
-    result.push(roundData.answer);
-    timestamp = roundData.updatedAt;
-
-    const date = new Date(timestamp * 1000).toISOString().split("T")[0];
-
-    if (!dataByDate[date]) {
-      dataByDate[date] = [];
-    }
-
-    dataByDate[date].push(toNumber(roundData.answer, 8));
-  }
+  const dataByDate = await fetchHistoricalData(contract, startTime);
 
   return NextResponse.json(dataByDate);
 }
