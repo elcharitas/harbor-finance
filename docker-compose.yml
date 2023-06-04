@@ -9,6 +9,22 @@ services:
     command: node -config /chainlink/config.toml -secrets /chainlink/secrets.toml start
     depends_on:
       - postgres
+      - hardhat-node
+
+  hardhat-node:
+    image: node:18-alpine
+    container_name: hardhat-node
+    ports:
+      - '8545:8545'
+    command: |
+      sh -c '
+        mkdir /app &&
+        cd /app &&
+        npm init -y &&
+        npm install hardhat &&
+        echo "module.exports = {solidity: \"0.8.4\"};" > hardhat.config.js &&
+        npx hardhat node
+      '
 
   postgres:
     image: postgres:13
