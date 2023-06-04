@@ -57,12 +57,22 @@ export async function GET(request: Request) {
   const result = [latestRoundData.answer];
   let timestamp = toNumber(latestRoundData.updatedAt);
 
+  const dataByDate: Record<string, number[]> = {};
+
   while (timestamp > startTime) {
     roundId = roundId.sub(BigNumber.from(1));
     const roundData = await getRoundData(contract, roundId);
     result.push(roundData.answer);
     timestamp = roundData.updatedAt;
+
+    const date = new Date(timestamp * 1000).toISOString().split("T")[0];
+
+    if (!dataByDate[date]) {
+      dataByDate[date] = [];
+    }
+
+    dataByDate[date].push(toNumber(roundData.answer, 8));
   }
 
-  return NextResponse.json(result.map((r) => toNumber(r, 8)));
+  return NextResponse.json(dataByDate);
 }
