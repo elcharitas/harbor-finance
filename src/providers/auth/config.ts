@@ -5,13 +5,13 @@ import {
 } from "@rainbow-me/rainbowkit/wallets";
 import { configureChains, createConfig } from "wagmi";
 import { hardhat, polygonMumbai } from "viem/chains";
-import { publicProvider } from "wagmi/providers/public";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import CONFIG from "src/configs";
 
 export const { chains, publicClient } = configureChains(
   // switch to hardhat for local development
   [CONFIG.APP.IS_DEV ? hardhat : polygonMumbai],
-  [publicProvider()]
+  [jsonRpcProvider({ rpc: () => ({ http: CONFIG.NETWORK.RPC_URL }) })]
 );
 
 const connectors = connectorsForWallets([

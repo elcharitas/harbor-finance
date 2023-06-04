@@ -30,6 +30,7 @@ async function main() {
     NETWORK_ID: ethers.utils.formatUnits(chainId, 0),
     DAI_TOKEN_ADDRESS: daiToken.address,
     SAVINGS_GOAL_FACTORY_ADDRESS: savingsGoalFactory.address,
+    QUICK_NODE_URL: "http://localhost:8545",
   };
 }
 
