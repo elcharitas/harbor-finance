@@ -101,7 +101,7 @@ const App: NextPage = () => {
           mt={{ base: "8", md: "24" }}
         >
           <Feature
-            title="Earnings"
+            title="Balance"
             description={
               <HStack>
                 <Text
@@ -195,7 +195,7 @@ const App: NextPage = () => {
                 delay: 0.6,
               },
               {
-                title: "Goals Tracker",
+                title: "Growth Tracker",
                 description: (
                   <Box pt={4}>
                     <Line

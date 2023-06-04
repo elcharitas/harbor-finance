@@ -30,6 +30,8 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
         uint256 amount
     );
 
+    constructor(){}
+
     /**
      * @notice Checks if a token is allowed for savings goals
      * @param token The address of the token to check
