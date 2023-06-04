@@ -210,10 +210,7 @@ const App: NextPage = () => {
                             borderColor: "rgba(75,192,192,1)",
                             borderCapStyle: "butt",
                             borderDash: [],
-                            data: [
-                              0,
-                              ...Object.values(chainlinkPriceFeeds ?? {}),
-                            ],
+                            data: Object.values(chainlinkPriceFeeds ?? {}),
                           },
                         ],
                       }}
