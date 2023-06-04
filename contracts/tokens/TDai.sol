@@ -8,4 +8,8 @@ contract TDai is ERC20, ERC20Permit {
     constructor() ERC20("TDai", "TDAI") ERC20Permit("TDai") {
         _mint(msg.sender, 1000000000000000000000000);
     }
+
+    function mint(uint256 _amount) external {
+        _mint(msg.sender, _amount);
+    }
 }
