@@ -35,7 +35,7 @@ export async function GET(request: Request) {
   const routeUrl = new URL(request.url);
 
   const contractAddress = routeUrl.searchParams.get("contract");
-  const days = parseInt(routeUrl.searchParams.get("days") || "1");
+  const days = Number(routeUrl.searchParams.get("days") || "1");
 
   if (!contractAddress) {
     return NextResponse.json({
