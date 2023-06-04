@@ -81,8 +81,11 @@ const App: NextPage = () => {
     `/api/aggregator?contract=${
       referenceDataFeeds?.find((feed) =>
         feed.name.match(
-          tokensList?.find(({ address }) => address === selectedToken)
-            ?.symbol ?? ""
+          new RegExp(
+            tokensList?.find(({ address }) => address === selectedToken)
+              ?.symbol ?? "Dai",
+            "i"
+          )
         )
       )?.contractAddress
     }`
