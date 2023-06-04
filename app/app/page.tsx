@@ -38,6 +38,7 @@ import { Feature, Features } from "src/components/features";
 import { useSavingsFactoryRead, useSavings } from "src/hooks/common";
 import { useGetTokensMeta } from "src/hooks/use-get-token-meta";
 import { ContractAddress } from "src/hooks/types";
+import { useFetch } from "usehooks-ts";
 
 Chart.register(CategoryScale);
 Chart.register(LinearScale);
@@ -73,6 +74,19 @@ const App: NextPage = () => {
       functionName: "remainingAmount",
     },
   ]);
+  const { data: referenceDataFeeds } = useFetch<
+    Record<"contractAddress" | "name", string>[]
+  >("https://reference-data-directory.vercel.app/feeds-matic-testnet.json");
+  const { data: chainlinkPriceFeeds } = useFetch<Record<string, number[]>>(
+    `/api/aggregator?contract=${
+      referenceDataFeeds?.find((feed) =>
+        feed.name.match(
+          tokensList?.find(({ address }) => address === selectedToken)
+            ?.symbol ?? ""
+        )
+      )?.contractAddress
+    }`
+  );
 
   const totalBalance = savingsList?.reduce((total, saving) => {
     const selectedAddress = selectedToken || tokensList?.[0].address;
@@ -187,15 +201,7 @@ const App: NextPage = () => {
                     <Line
                       height={350}
                       data={{
-                        labels: [
-                          "January",
-                          "February",
-                          "March",
-                          "April",
-                          "May",
-                          "June",
-                          "July",
-                        ],
+                        labels: Object.keys(chainlinkPriceFeeds ?? {}),
                         datasets: [
                           {
                             label: "My First dataset",
@@ -204,7 +210,7 @@ const App: NextPage = () => {
                             borderColor: "rgba(75,192,192,1)",
                             borderCapStyle: "butt",
                             borderDash: [],
-                            data: [65, 59, 80, 81, 56, 55, 40],
+                            data: Object.values(chainlinkPriceFeeds ?? {}),
                           },
                         ],
                       }}
