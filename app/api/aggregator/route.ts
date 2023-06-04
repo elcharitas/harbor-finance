@@ -38,9 +38,14 @@ export async function GET(request: Request) {
   const days = Number(routeUrl.searchParams.get("days") || "1");
 
   if (!contractAddress) {
-    return NextResponse.json({
-      error: "Please specify contract address",
-    });
+    return NextResponse.json(
+      {
+        error: "Please specify contract address",
+      },
+      {
+        status: 400,
+      }
+    );
   }
 
   const endTime = Date.now() / 1000;
