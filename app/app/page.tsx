@@ -149,7 +149,7 @@ const App: NextPage = () => {
               display={{ base: "none", md: "block" }}
               isDisabled
             >
-              Borrow
+              Loan
             </Button>
             <Button
               variant="primary"
