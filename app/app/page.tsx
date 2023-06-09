@@ -101,7 +101,7 @@ const App: NextPage = () => {
 
   const currentToken = selectedToken || tokensList?.[0];
 
-  const { data: allowance } = useContractRead({
+  const { data: allowance, refetch: refetchAllowance } = useContractRead({
     abi: TDaiData.abi,
     functionName: "allowance",
     address: currentToken?.address,
@@ -151,6 +151,7 @@ const App: NextPage = () => {
           description: "You need to approve the factory to proceed",
         });
         await approveFactory({});
+        await refetchAllowance();
         snackbar.success({
           description: "Harbor can now save funds on your behalf",
         });
