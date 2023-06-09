@@ -25,7 +25,7 @@ contract SavingsGoal is Ownable {
     uint256 public immutable startTimestamp;
     uint256 public goalAmount;
     uint256 public daysToReachGoal;
-    uint256 private timeToReachGoal;
+    uint256 public timeToReachGoal;
     string public goalName;
     string public goalDescription;
 
@@ -55,28 +55,6 @@ contract SavingsGoal is Ownable {
         goalDescription = _goalDescription;
 
         startTimestamp = block.timestamp;
-    }
-
-    function addFunds() external {
-        require(startTimestamp > 0, "Goal has not started yet");
-
-        uint256 elapsedTime = block.timestamp - startTimestamp;
-        require(elapsedTime <= timeToReachGoal, "Goal period has ended");
-
-        IERC20 dai = IERC20(token);
-
-        uint256 goalBalance = dai.balanceOf(address(this));
-        require(goalBalance < goalAmount, "Goal has been reached");
-
-        uint256 amountToAdd = goalAmount / daysToReachGoal;
-        require(
-            goalBalance + amountToAdd <= goalAmount,
-            "Goal amount has already been reached"
-        );
-
-        dai.transferFrom(owner(), address(this), amountToAdd);
-
-        emit SavingsGoalFunded(address(this), msg.sender, amountToAdd);
     }
 
     function remainingAmount() external view returns (uint256) {

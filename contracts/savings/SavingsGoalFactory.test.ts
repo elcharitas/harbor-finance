@@ -3,10 +3,68 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { SavingsGoalFactory, TDai } from "@contract-types/index";
 
+async function createVRS(
+  owner: SignerWithAddress,
+  daiToken: TDai,
+  savingsGoalFactory: SavingsGoalFactory
+) {
+  const domain = {
+    name: await daiToken.name(),
+    version: "1",
+    chainId: 31337,
+    verifyingContract: daiToken.address,
+  };
+  const Permit = [
+    { name: "owner", type: "address" },
+    { name: "spender", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "nonce", type: "uint256" },
+    { name: "deadline", type: "uint256" },
+  ];
+  const message = {
+    owner: owner.address,
+    spender: savingsGoalFactory.address,
+    value: ethers.constants.MaxUint256,
+    nonce: await daiToken.nonces(owner.address),
+    deadline: ethers.constants.MaxUint256,
+  };
+
+  const signature = await owner._signTypedData(domain,
+    { Permit},
+    message
+  );
+
+  const { v, r, s } = ethers.utils.splitSignature(signature);
+
+  return ethers.utils.defaultAbiCoder.encode(
+    [
+      "address",
+      "address",
+      "uint256",
+      "uint256",
+      "uint256",
+      "uint8",
+      "bytes32",
+      "bytes32",
+    ],
+    [
+      message.owner,
+      message.spender,
+      message.value,
+      message.nonce,
+      message.deadline,
+      v,
+      r,
+      s,
+    ]
+  );
+}
+
 describe("SavingsGoalFactory", function () {
   let daiToken: TDai;
   let savingsGoalFactory: SavingsGoalFactory;
   let owner: SignerWithAddress;
+  let signers: SignerWithAddress[];
 
   beforeEach(async function () {
     const daiTokenFactory = await ethers.getContractFactory("TDai");
@@ -14,7 +72,7 @@ describe("SavingsGoalFactory", function () {
       "SavingsGoalFactory"
     );
 
-    [owner] = await ethers.getSigners();
+    [owner, ...signers] = await ethers.getSigners();
     savingsGoalFactory = await SavingsGoalFactory.deploy();
     daiToken = await daiTokenFactory.deploy();
 
@@ -44,7 +102,8 @@ describe("SavingsGoalFactory", function () {
           goalAmount,
           daysToReachGoal,
           goalName,
-          goalDescription
+          goalDescription,
+          await createVRS(owner, daiToken, savingsGoalFactory)
         );
 
       const allSavingsGoals = await savingsGoalFactory.getAllSavingsGoals();
@@ -52,6 +111,10 @@ describe("SavingsGoalFactory", function () {
 
       const userSavingsGoals = await savingsGoalFactory.getUserSavingsGoals();
       expect(userSavingsGoals.length).to.equal(1);
+      expect(
+        (await savingsGoalFactory.connect(signers[0]).getUserSavingsGoals())
+          .length
+      ).to.equal(0);
     });
   });
 
@@ -114,7 +177,8 @@ describe("SavingsGoalFactory", function () {
           goalAmount,
           daysToReachGoal,
           goalName,
-          goalDescription
+          goalDescription,
+          await createVRS(owner, daiToken, savingsGoalFactory)
         );
 
       const [upkeepNeeded, performData] = await savingsGoalFactory.checkUpkeep(
@@ -148,7 +212,8 @@ describe("SavingsGoalFactory", function () {
           goalAmount,
           daysToReachGoal,
           goalName,
-          goalDescription
+          goalDescription,
+          await createVRS(owner, daiToken, savingsGoalFactory)
         );
 
       const [upkeepNeeded, performData] = await savingsGoalFactory.checkUpkeep(

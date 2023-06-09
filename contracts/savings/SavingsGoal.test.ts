@@ -40,13 +40,6 @@ describe("SavingsGoal", function () {
     });
   });
 
-  describe(".addFunds()", function () {
-    it("should allow funding to the goal", async function () {
-      await savingsGoal.addFunds();
-      expect(await savingsGoal.balance()).to.be.greaterThan(0);
-    });
-  });
-
   describe(".withdraw()", function () {
     it("should revert if not called by the owner", async function () {
       expect(savingsGoal.connect(signers[0]).withdraw()).to.be.revertedWith(
@@ -55,7 +48,6 @@ describe("SavingsGoal", function () {
     });
 
     it("should not withdraw from a savings goal if not reached", async function () {
-      await savingsGoal.addFunds();
       expect(savingsGoal.withdraw()).to.be.revertedWith("Goal not reached");
     });
   });

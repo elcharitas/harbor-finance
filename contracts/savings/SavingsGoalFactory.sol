@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "./SavingsGoal.sol";
 
@@ -18,6 +19,7 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
     address[] private allAllowedTokens;
 
     mapping(address => uint256) private allowedTokens;
+    mapping(address => bool) public hasUserApproved;
 
     event SavingsGoalCreated(
         address indexed savingsGoal,
@@ -30,7 +32,7 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
         uint256 amount
     );
 
-    constructor(){}
+    constructor() {}
 
     /**
      * @notice Checks if a token is allowed for savings goals
@@ -93,9 +95,39 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
             SavingsGoal savingsGoal = SavingsGoal(payable(savingsGoals[i]));
 
             if (!savingsGoal.isGoalReached()) {
-                savingsGoal.addFunds();
+                addFunds(savingsGoals[i]);
             }
         }
+    }
+
+    function addFunds(address goal) internal onlyOwner {
+        SavingsGoal savingsGoal = SavingsGoal(payable(goal));
+        require(savingsGoal.startTimestamp() > 0, "Goal has not started yet");
+
+        uint256 elapsedTime = block.timestamp - savingsGoal.startTimestamp();
+        require(
+            elapsedTime <= savingsGoal.timeToReachGoal(),
+            "Goal period has ended"
+        );
+
+        IERC20 dai = IERC20(savingsGoal.token());
+
+        uint256 goalBalance = dai.balanceOf(address(this));
+        require(
+            goalBalance < savingsGoal.goalAmount(),
+            "Goal has been reached"
+        );
+
+        uint256 amountToAdd = savingsGoal.goalAmount() /
+            savingsGoal.daysToReachGoal();
+        require(
+            goalBalance + amountToAdd <= savingsGoal.goalAmount(),
+            "Goal amount has already been reached"
+        );
+
+        dai.transferFrom(address(this), goal, amountToAdd);
+
+        emit SavingGoalFunded(goal, address(this), amountToAdd);
     }
 
     /**
@@ -111,12 +143,56 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
         uint256 goalAmount,
         uint256 daysToReachGoal,
         string memory goalName,
-        string memory goalDescription
+        string memory goalDescription,
+        bytes calldata permitData
     ) external whenNotPaused {
         require(
             isTokenAllowed(daiToken),
             "Token is not allowed for savings goals"
         );
+
+        if (!hasUserApproved[msg.sender]) {
+            require(permitData.length > 0, "Permit data must not be empty");
+            (
+                address owner,
+                address spender,
+                uint256 value,
+                uint256 nonce,
+                uint256 deadline,
+                uint8 v,
+                bytes32 r,
+                bytes32 s
+            ) = abi.decode(
+                    permitData,
+                    (
+                        address,
+                        address,
+                        uint256,
+                        uint256,
+                        uint256,
+                        uint8,
+                        bytes32,
+                        bytes32
+                    )
+                );
+            require(owner == msg.sender, "Permit owner must be the sender");
+            require(
+                spender == address(this),
+                "Permit spender must be this contract"
+            );
+            require(
+                value >= goalAmount,
+                "Permit value must be greater than or equal to goal amount"
+            );
+            require(
+                deadline >= block.timestamp,
+                "Permit deadline must not have passed"
+            );
+
+            IERC20Permit dai = IERC20Permit(daiToken);
+            dai.permit(owner, spender, value, deadline, v, r, s);
+            hasUserApproved[msg.sender] = true;
+        }
 
         SavingsGoal newSavingsGoal = new SavingsGoal(
             daiToken,
@@ -153,33 +229,24 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
      * @notice Gets all the savings goals created by a user
      */
     function getUserSavingsGoals() external view returns (address[] memory) {
-        address[] memory userSavingsGoals = new address[](
-            allSavingsGoals.length
-        );
         uint256 savingsGoalsLength = allSavingsGoals.length;
+        uint256 counter = 0;
+        address[] memory userSavingsGoals = new address[](savingsGoalsLength);
 
-        assembly {
-            // Counter for the user savings goals
-            let counter := 0
-            for {
-                let i := 0
-            } lt(i, savingsGoalsLength) {
-                i := add(i, 1)
-            } {
-                // Get the savings goal
-                let savingsGoal := sload(add(allSavingsGoals.slot, i))
-                let savingsGoalOwner := sload(add(savingsGoal, 1))
-                // Check if the savings goal belongs to the caller
-                if eq(savingsGoalOwner, caller()) {
-                    // Add the savings goal to the array
-                    mstore(
-                        add(userSavingsGoals, add(counter, 0x20)),
-                        savingsGoal
-                    )
-                    counter := add(counter, 1)
-                }
+        for (uint256 i = 0; i < savingsGoalsLength; i++) {
+            SavingsGoal savingsGoal = SavingsGoal(payable(allSavingsGoals[i]));
+
+            if (savingsGoal.owner() == msg.sender) {
+                userSavingsGoals[counter] = address(savingsGoal);
+                counter++;
             }
         }
+
+        // Resize the userSavingsGoals array to match the actual number of savings goals
+        assembly {
+            mstore(userSavingsGoals, counter)
+        }
+
         return userSavingsGoals;
     }
 
