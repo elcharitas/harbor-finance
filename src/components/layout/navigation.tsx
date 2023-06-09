@@ -19,7 +19,7 @@ const NAV_LINKS = [
   },
   {
     label: "Github",
-    href: "https://github.com/",
+    href: "https://github.com/elcharitas/harbor-finance",
     title: "View the Source code",
   },
   {

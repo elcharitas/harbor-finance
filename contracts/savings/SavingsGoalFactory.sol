@@ -143,56 +143,12 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
         uint256 goalAmount,
         uint256 daysToReachGoal,
         string memory goalName,
-        string memory goalDescription,
-        bytes calldata permitData
+        string memory goalDescription
     ) external whenNotPaused {
         require(
             isTokenAllowed(daiToken),
             "Token is not allowed for savings goals"
         );
-
-        if (!hasUserApproved[msg.sender]) {
-            require(permitData.length > 0, "Permit data must not be empty");
-            (
-                address owner,
-                address spender,
-                uint256 value,
-                uint256 nonce,
-                uint256 deadline,
-                uint8 v,
-                bytes32 r,
-                bytes32 s
-            ) = abi.decode(
-                    permitData,
-                    (
-                        address,
-                        address,
-                        uint256,
-                        uint256,
-                        uint256,
-                        uint8,
-                        bytes32,
-                        bytes32
-                    )
-                );
-            require(owner == msg.sender, "Permit owner must be the sender");
-            require(
-                spender == address(this),
-                "Permit spender must be this contract"
-            );
-            require(
-                value >= goalAmount,
-                "Permit value must be greater than or equal to goal amount"
-            );
-            require(
-                deadline >= block.timestamp,
-                "Permit deadline must not have passed"
-            );
-
-            IERC20Permit dai = IERC20Permit(daiToken);
-            dai.permit(owner, spender, value, deadline, v, r, s);
-            hasUserApproved[msg.sender] = true;
-        }
 
         SavingsGoal newSavingsGoal = new SavingsGoal(
             daiToken,

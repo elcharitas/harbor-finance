@@ -17,12 +17,12 @@ const Docs: NextPage = () => {
           <Features
             features={[
               {
-                title: "Investments",
-                description: "",
+                title: "What is Harbor?",
+                description: "Harbor is a decentralized savings dApp.",
                 delay: 0.6,
               },
               {
-                title: "Wallet Balance",
+                title: "What are Wallets?",
                 description: "",
                 delay: 0.8,
               },

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { NextPage } from "next";
+import { useAccount, useConnect } from "wagmi";
 import { Line } from "react-chartjs-2";
 import {
   CategoryScale,
@@ -27,6 +28,7 @@ import {
   SelectButton,
   SelectList,
   SubmitButton,
+  useSnackbar,
 } from "@saas-ui/react";
 import { FiPlusSquare } from "react-icons/fi";
 
@@ -34,7 +36,11 @@ import { BackgroundGradient } from "src/components/gradients/background-gradient
 import { PageTransition } from "src/components/motion/page-transition";
 import { Section } from "src/components/section";
 import { Feature, Features } from "src/components/features";
-import { useSavingsFactoryRead, useSavings } from "src/hooks/common";
+import {
+  useSavings,
+  useSavingsFactoryRead,
+  useSavingsFactoryWrite,
+} from "src/hooks/common";
 import { useGetTokensMeta } from "src/hooks/use-get-token-meta";
 import { ContractAddress } from "src/hooks/types";
 import { useFetch } from "usehooks-ts";
@@ -46,6 +52,13 @@ Chart.register(LineElement);
 
 const App: NextPage = () => {
   const disclosure = useDisclosure();
+  const snackbar = useSnackbar();
+  const { isConnected } = useAccount({
+    onConnect() {
+      snackbar.info({ description: "Wallet connected successfully" });
+    },
+  });
+  const { connect } = useConnect();
   const [selectedToken, setSelectedToken] = useState<{
     symbol: string;
     address: ContractAddress;
@@ -80,13 +93,50 @@ const App: NextPage = () => {
         ?.symbol || "Dai"
     }`
   );
+  const { writeAsync } = useSavingsFactoryWrite({
+    functionName: "createSavingsGoal",
+  });
+
+  const currentToken = selectedToken || tokensList?.[0];
 
   const totalBalance = savingsList?.reduce((total, saving) => {
-    const { address } = (selectedToken || tokensList?.[0]) ?? {};
+    const { address } = currentToken ?? {};
     return saving.address === address
       ? total + saving.balance.toNumber()
       : total;
   }, 0);
+
+  const handleSubmit = async ({
+    goalAmount,
+    daysToReachGoal,
+    goalName,
+    goalDescription,
+  }: Record<string, string>) => {
+    if (!isConnected) {
+      snackbar.info({ description: "Attempting optimistic connection" });
+      connect();
+    }
+    if (!currentToken?.address) {
+      snackbar.error({ description: "Please select a token" });
+      return;
+    }
+    try {
+      await writeAsync({
+        args: [
+          currentToken.address,
+          goalAmount,
+          daysToReachGoal,
+          goalName,
+          goalDescription,
+        ],
+      });
+      snackbar.success({
+        description: `You're ${daysToReachGoal} days from achieving your goal 😍`,
+      });
+    } catch (e) {
+      snackbar.error({ description: "This is weird but an error occurred 😭" });
+    }
+  };
 
   return (
     <Section p="0">
@@ -101,7 +151,7 @@ const App: NextPage = () => {
           mt={{ base: "8", md: "24" }}
         >
           <Feature
-            title="Balance"
+            title="Saving Balance"
             description={
               <HStack>
                 <Text
@@ -156,6 +206,7 @@ const App: NextPage = () => {
               size="md"
               onClick={disclosure.onOpen}
               leftIcon={<FiPlusSquare />}
+              isDisabled={!isConnected}
             >
               New Savings
             </Button>
@@ -238,25 +289,41 @@ const App: NextPage = () => {
       </Box>
       <FormDialog
         title=" "
-        onSubmit={() => null}
+        onSubmit={handleSubmit}
         {...disclosure}
         footer={
           <ModalFooter>
-            <SubmitButton>Withdraw</SubmitButton>
+            <SubmitButton>Create Goal</SubmitButton>
           </ModalFooter>
         }
       >
         <FormLayout>
           <Field
-            name="amount"
+            name="goalName"
+            label="Goal Title:"
+            rules={{
+              required: "Writing what you're saving for helps keep track.",
+            }}
+          />
+          <Field
+            name="goalDescription"
+            label="Describe your goal:"
+            rules={{
+              required:
+                "Try describing in one or two words what this goal is to you.",
+            }}
+          />
+          <Field
+            name="goalAmount"
             label="Amount:"
-            rules={{ required: "Amount is required" }}
+            rules={{ required: "The amount to save is required" }}
             type="number"
           />
           <Field
-            name="address"
-            label="Wallet Address:"
-            rules={{ required: "Wallet Address is required" }}
+            name="daysToReachGoal"
+            label="How many days should we save for:"
+            rules={{ required: "Amount is required" }}
+            type="number"
           />
         </FormLayout>
       </FormDialog>
