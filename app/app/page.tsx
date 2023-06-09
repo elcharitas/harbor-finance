@@ -259,11 +259,15 @@ const App: NextPage = () => {
                     <DataTable
                       columns={[
                         {
+                          header: "#",
+                          accessorKey: "id",
+                        },
+                        {
                           header: "Name",
                           accessorKey: "goalName",
                         },
                         {
-                          header: "Token",
+                          header: "Goal Address",
                           accessorKey: "address",
                         },
                         {
@@ -275,7 +279,12 @@ const App: NextPage = () => {
                           accessorKey: "daysToReachGoal",
                         },
                       ]}
-                      data={savingsList ?? []}
+                      data={(savingsList ?? []).map((saving, id) => ({
+                        ...saving,
+                        id: id + 1,
+                        goalAmount: saving.goalAmount.toString(),
+                        daysToReachGoal: saving.daysToReachGoal.toString(),
+                      }))}
                     />
                   </Box>
                 ),

@@ -75,7 +75,7 @@ export const Feature: React.FC<FeatureProps> = (props) => {
           <Icon as={icon} boxSize={iconSize} />
         </Circle>
       )}
-      <Box>
+      <Box maxW="100%">
         <Heading sx={styles.title}>{title}</Heading>
         <Text as="div" sx={styles.description}>
           {description}
