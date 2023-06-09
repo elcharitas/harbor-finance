@@ -1,7 +1,12 @@
 "use client";
 import { useState } from "react";
 import { NextPage } from "next";
-import { useAccount, useConnect } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useContractRead,
+  useContractWrite,
+} from "wagmi";
 import { Line } from "react-chartjs-2";
 import {
   CategoryScale,
@@ -44,6 +49,9 @@ import {
 import { useGetTokensMeta } from "src/hooks/use-get-token-meta";
 import { ContractAddress } from "src/hooks/types";
 import { useFetch } from "usehooks-ts";
+import TDaiData from "@contracts/tokens/TDai.sol/TDai.json";
+import { BigNumber, ethers } from "ethers";
+import CONFIG from "src/configs";
 
 Chart.register(CategoryScale);
 Chart.register(LinearScale);
@@ -66,9 +74,12 @@ const App: NextPage = () => {
   const { data: tokens } = useSavingsFactoryRead<ContractAddress[]>({
     functionName: "getAllAllowedTokens",
   });
-  const { data: userSavingsGoals } = useSavingsFactoryRead<ContractAddress[]>({
+  const { data: userSavingsGoals, refetch } = useSavingsFactoryRead<
+    ContractAddress[]
+  >({
     functionName: "getUserSavingsGoals",
   });
+
   const { data: tokensList } = useGetTokensMeta({ tokens });
   const { data: savingsList } = useSavings(userSavingsGoals, [
     {
@@ -87,8 +98,24 @@ const App: NextPage = () => {
       functionName: "remainingAmount",
     },
   ]);
+
+  const currentToken = selectedToken || tokensList?.[0];
+
+  const { data: allowance } = useContractRead({
+    abi: TDaiData.abi,
+    functionName: "allowance",
+    address: currentToken?.address,
+    args: [CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY],
+  });
+  const { writeAsync: approveFactory } = useContractWrite({
+    abi: TDaiData.abi,
+    functionName: "approve",
+    address: currentToken?.address,
+    args: [CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY, ethers.constants.MaxUint256],
+  });
+
   const { data: chainlinkPriceFeeds } = useFetch<Record<string, number[]>>(
-    `/api/aggregator?days=7&contract=${
+    `/api/aggregator?days=3&contract=${
       tokensList?.find(({ address }) => address === selectedToken?.address)
         ?.symbol || "Dai"
     }`
@@ -96,8 +123,6 @@ const App: NextPage = () => {
   const { writeAsync } = useSavingsFactoryWrite({
     functionName: "createSavingsGoal",
   });
-
-  const currentToken = selectedToken || tokensList?.[0];
 
   const totalBalance = savingsList?.reduce((total, saving) => {
     const { address } = currentToken ?? {};
@@ -121,6 +146,15 @@ const App: NextPage = () => {
       return;
     }
     try {
+      if (!allowance || (allowance as BigNumber).toNumber() === 0) {
+        snackbar.info({
+          description: "You need to approve the factory to proceed",
+        });
+        await approveFactory({});
+        snackbar.success({
+          description: "Harbor can now save funds on your behalf",
+        });
+      }
       await writeAsync({
         args: [
           currentToken.address,
@@ -133,6 +167,7 @@ const App: NextPage = () => {
       snackbar.success({
         description: `You're ${daysToReachGoal} days from achieving your goal 😍`,
       });
+      await refetch();
     } catch (e) {
       snackbar.error({ description: "This is weird but an error occurred 😭" });
     }
