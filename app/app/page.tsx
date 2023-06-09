@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { NextPage } from "next";
 import {
   useAccount,
@@ -98,7 +98,7 @@ const App: NextPage = () => {
       functionName: "remainingAmount",
     },
   ]);
-
+  const tableRef = useRef(null);
   const currentToken = selectedToken || tokensList?.[0];
 
   const { data: allowance, refetch: refetchAllowance } = useContractRead({
@@ -256,7 +256,9 @@ const App: NextPage = () => {
                 title: "Saving Goals",
                 description: (
                   <Box pt={4} overflowX="scroll">
+                    <Button>Trigger Fund</Button>
                     <DataTable
+                      ref={tableRef}
                       columns={[
                         {
                           header: "#",
@@ -285,6 +287,7 @@ const App: NextPage = () => {
                         goalAmount: saving.goalAmount.toString(),
                         daysToReachGoal: saving.daysToReachGoal.toString(),
                       }))}
+                      isSelectable
                     />
                   </Box>
                 ),
