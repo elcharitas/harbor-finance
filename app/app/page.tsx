@@ -73,7 +73,7 @@ const App: NextPage = () => {
   const { data: userSavingsGoals, refetch } = useSavingsFactoryRead<
     ContractAddress[]
   >({
-    functionName: "getUserSavingsGoals",
+    functionName: "getAllSavingsGoals",
     args: [],
   });
   const { address, isConnected } = useAccount({
@@ -195,9 +195,7 @@ const App: NextPage = () => {
     const selectedRows = tableRef.current?.getSelectedRowModel().rows;
     if (selectedRows?.length) {
       const addresses = selectedRows.map((row) => row.getValue("address"));
-      const performData = ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(JSON.stringify(addresses))
-      );
+      const performData = ethers.utils.toUtf8Bytes(JSON.stringify([addresses]));
       await triggerUpkeep({
         args: [performData],
       });
