@@ -14,6 +14,7 @@ export function useSavingsFactoryRead<
     abi: SavingsGoalFactoryData.abi,
     functionName,
     args,
+    chainId: Number(CONFIG.NETWORK.ID),
   });
 
   return { data: data as R, ...rest };

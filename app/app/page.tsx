@@ -70,13 +70,12 @@ const App: NextPage = () => {
   const { data: tokens } = useSavingsFactoryRead<ContractAddress[]>({
     functionName: "getAllAllowedTokens",
   });
-  const { data: userSavingsGoals, refetch, error } = useSavingsFactoryRead<
+  const { data: userSavingsGoals, refetch } = useSavingsFactoryRead<
     ContractAddress[]
   >({
     functionName: "getUserSavingsGoals",
   });
-  console.log({ userSavingsGoals, error });
-  const { isConnected } = useAccount({
+  const { address, isConnected } = useAccount({
     async onConnect() {
       await refetch();
       snackbar.info({ description: "Wallet connected successfully" });
@@ -108,7 +107,8 @@ const App: NextPage = () => {
     abi: TDaiData.abi,
     functionName: "allowance",
     address: currentToken?.address,
-    args: [CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY],
+    args: [address, CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY],
+    chainId: Number(CONFIG.NETWORK.ID),
   });
   const { writeAsync: approveFactory } = useContractWrite({
     abi: TDaiData.abi,
