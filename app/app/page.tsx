@@ -253,7 +253,7 @@ const App: NextPage = () => {
         .catch(() => {
           snackbar.error({
             title: "Oops! We couldn't catch that",
-            description: "Please try again later",
+            description: "Please ensure you have enough funds to withdraw",
           });
           setSavingAddress(undefined);
         });
