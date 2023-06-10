@@ -35,6 +35,7 @@ import {
   SubmitButton,
   useSnackbar,
 } from "@saas-ui/react";
+import { TableInstance } from "@saas-ui/data-table";
 import { FiPlusSquare } from "react-icons/fi";
 
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
@@ -111,7 +112,10 @@ const App: NextPage = () => {
     abi: TDaiData.abi,
     functionName: "approve",
     address: currentToken?.address,
-    args: [CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY, ethers.constants.MaxUint256],
+    args: [
+      CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY,
+      ethers.constants.MaxUint256.sub(1_000_000), // remove 1 million from max uint256 to avoid overflow
+    ],
   });
 
   const { data: chainlinkPriceFeeds } = useFetch<Record<string, number[]>>(
@@ -122,6 +126,9 @@ const App: NextPage = () => {
   );
   const { writeAsync } = useSavingsFactoryWrite({
     functionName: "createSavingsGoal",
+  });
+  const { writeAsync: triggerUpkeep } = useSavingsFactoryWrite({
+    functionName: "performUpkeep",
   });
 
   const totalBalance = savingsList?.reduce((total, saving) => {
@@ -165,12 +172,28 @@ const App: NextPage = () => {
           goalDescription,
         ],
       });
+      await refetch();
+      disclosure.onClose();
       snackbar.success({
         description: `You're ${daysToReachGoal} days from achieving your goal 😍`,
       });
-      await refetch();
     } catch (e) {
       snackbar.error({ description: "This is weird but an error occurred 😭" });
+    }
+  };
+
+  const handleUpkeep = async () => {
+    const selectedRows = ((tableRef.current as unknown) as TableInstance<
+      typeof savingsList
+    >)?.getSelectedRowModel().rows;
+    if (selectedRows?.length) {
+      const addresses = selectedRows.map((row) => row.getValue("address"));
+      const performData = ethers.utils.hexlify(
+        ethers.utils.toUtf8Bytes(JSON.stringify(addresses))
+      );
+      await triggerUpkeep({
+        args: [performData],
+      });
     }
   };
 
@@ -256,7 +279,12 @@ const App: NextPage = () => {
                 title: "Saving Goals",
                 description: (
                   <Box pt={4} overflowX="scroll">
-                    <Button>Trigger Fund</Button>
+                    <Button
+                      onClick={handleUpkeep}
+                      isDisabled={!savingsList?.length}
+                    >
+                      Trigger Upkeep (Fund Savings)
+                    </Button>
                     <DataTable
                       ref={tableRef}
                       columns={[
@@ -269,7 +297,7 @@ const App: NextPage = () => {
                           accessorKey: "goalName",
                         },
                         {
-                          header: "Goal Address",
+                          header: "Fund Address",
                           accessorKey: "address",
                         },
                         {
@@ -286,6 +314,7 @@ const App: NextPage = () => {
                         id: id + 1,
                         goalAmount: saving.goalAmount.toString(),
                         daysToReachGoal: saving.daysToReachGoal.toString(),
+                        address: saving.address.slice(0, 6),
                       }))}
                       isSelectable
                     />
