@@ -74,6 +74,7 @@ const App: NextPage = () => {
     ContractAddress[]
   >({
     functionName: "getUserSavingsGoals",
+    args: [],
   });
   const { address, isConnected } = useAccount({
     async onConnect() {
@@ -107,7 +108,10 @@ const App: NextPage = () => {
     abi: TDaiData.abi,
     functionName: "allowance",
     address: currentToken?.address,
-    args: [address, CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY],
+    args: [
+      address ?? currentToken?.address,
+      CONFIG.CONTRACTS.SAVINGS_GOAL_FACTORY,
+    ],
     chainId: Number(CONFIG.NETWORK.ID),
   });
   const { writeAsync: approveFactory } = useContractWrite({
@@ -155,7 +159,7 @@ const App: NextPage = () => {
       return;
     }
     try {
-      if (!allowance || (allowance as BigNumber).toNumber() === 0) {
+      if (!allowance || BigNumber.from(allowance).toString() === "0") {
         snackbar.info({
           description: "You need to approve the factory to proceed",
         });
