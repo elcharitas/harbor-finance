@@ -73,7 +73,7 @@ const App: NextPage = () => {
   const { data: userSavingsGoals, refetch } = useSavingsFactoryRead<
     ContractAddress[]
   >({
-    functionName: "getAllSavingsGoals",
+    functionName: "getUserSavingsGoals",
     args: [],
   });
   const { address, isConnected } = useAccount({
@@ -195,10 +195,19 @@ const App: NextPage = () => {
     const selectedRows = tableRef.current?.getSelectedRowModel().rows;
     if (selectedRows?.length) {
       const addresses = selectedRows.map((row) => row.getValue("address"));
-      const performData = ethers.utils.toUtf8Bytes(JSON.stringify([addresses]));
-      await triggerUpkeep({
-        args: [performData],
-      });
+      const abi = ethers.utils.defaultAbiCoder;
+      console.log({ addresses });
+      const performData = abi.encode(["address[]"], [addresses]);
+      try {
+        await triggerUpkeep({
+          args: [performData],
+        });
+      } catch (e) {
+        snackbar.error({
+          description: "This is weird but an error occurred 😭",
+          title: (e as Error)?.message || "Oops! We couldn't catch that",
+        });
+      }
     }
   };
 
@@ -311,6 +320,10 @@ const App: NextPage = () => {
                           accessorKey: "goalAmount",
                         },
                         {
+                          header: "Balance",
+                          accessorKey: "balance",
+                        },
+                        {
                           header: "Timeline",
                           accessorKey: "daysToReachGoal",
                         },
@@ -322,7 +335,7 @@ const App: NextPage = () => {
                             id: id + 1,
                             goalAmount: saving.goalAmount.toString(),
                             daysToReachGoal: saving.daysToReachGoal.toString(),
-                            address: saving.address.slice(0, 6),
+                            balance: saving.balance.toString(),
                           })),
                         [savingsList]
                       )}
