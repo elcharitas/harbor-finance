@@ -243,11 +243,18 @@ const App: NextPage = () => {
 
   useEffect(() => {
     if (savingAddress !== undefined) {
-      withdrawFunds().then(() => {
-        snackbar.success({
-          description: "Funds withdrawn successfully",
+      withdrawFunds()
+        .then(() => {
+          snackbar.success({
+            description: "Funds withdrawn successfully",
+          });
+        })
+        .catch((e) => {
+          snackbar.error({
+            title: (e as Error)?.message || "Oops! We couldn't catch that",
+            description: "Please try again later",
+          });
         });
-      });
     }
   }, [savingAddress, withdrawFunds, snackbar]);
 
