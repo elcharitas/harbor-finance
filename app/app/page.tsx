@@ -100,6 +100,9 @@ const App: NextPage = () => {
     {
       functionName: "remainingAmount",
     },
+    {
+      functionName: "token",
+    },
   ]);
   const tableRef = useRef<TableInstance<typeof savingsList> | null>(null);
   const currentToken = selectedToken || tokensList?.[0];
@@ -139,8 +142,8 @@ const App: NextPage = () => {
 
   const totalBalance = savingsList?.reduce((total, saving) => {
     const { address } = currentToken ?? {};
-    return saving.address === address
-      ? total + saving.balance.toNumber()
+    return saving.token.toLowerCase() === address?.toLowerCase()
+      ? total + Number(saving.balance.toString())
       : total;
   }, 0);
 
