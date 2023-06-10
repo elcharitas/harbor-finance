@@ -37,6 +37,8 @@ import {
 } from "@saas-ui/react";
 import { TableInstance } from "@saas-ui/data-table";
 import { FiPlusSquare } from "react-icons/fi";
+import { useFetch } from "usehooks-ts";
+import { BigNumber, ethers } from "ethers";
 
 import { BackgroundGradient } from "src/components/gradients/background-gradient";
 import { PageTransition } from "src/components/motion/page-transition";
@@ -49,10 +51,8 @@ import {
 } from "src/hooks/common";
 import { useGetTokensMeta } from "src/hooks/use-get-token-meta";
 import { ContractAddress } from "src/hooks/types";
-import { useFetch } from "usehooks-ts";
-import TDaiData from "@contracts/tokens/TDai.sol/TDai.json";
-import { BigNumber, ethers } from "ethers";
 import CONFIG from "src/configs";
+import TDaiData from "@contracts/tokens/TDai.sol/TDai.json";
 
 Chart.register(CategoryScale);
 Chart.register(LinearScale);
@@ -62,11 +62,6 @@ Chart.register(LineElement);
 const App: NextPage = () => {
   const disclosure = useDisclosure();
   const snackbar = useSnackbar();
-  const { isConnected } = useAccount({
-    onConnect() {
-      snackbar.info({ description: "Wallet connected successfully" });
-    },
-  });
   const { connect } = useConnect();
   const [selectedToken, setSelectedToken] = useState<{
     symbol: string;
@@ -78,7 +73,13 @@ const App: NextPage = () => {
   const { data: userSavingsGoals, refetch } = useSavingsFactoryRead<
     ContractAddress[]
   >({
-    functionName: "getUserSavingsGoals",
+    functionName: "getAllSavingsGoals",
+  });
+  const { isConnected } = useAccount({
+    async onConnect() {
+      await refetch();
+      snackbar.info({ description: "Wallet connected successfully" });
+    },
   });
 
   const { data: tokensList } = useGetTokensMeta({ tokens });
@@ -99,7 +100,7 @@ const App: NextPage = () => {
       functionName: "remainingAmount",
     },
   ]);
-  const tableRef = useRef(null);
+  const tableRef = useRef<TableInstance<typeof savingsList> | null>(null);
   const currentToken = selectedToken || tokensList?.[0];
 
   const { data: allowance, refetch: refetchAllowance } = useContractRead({
@@ -157,7 +158,7 @@ const App: NextPage = () => {
         snackbar.info({
           description: "You need to approve the factory to proceed",
         });
-        await approveFactory({});
+        await approveFactory();
         await refetchAllowance();
         snackbar.success({
           description: "Harbor can now save funds on your behalf",
@@ -178,14 +179,15 @@ const App: NextPage = () => {
         description: `You're ${daysToReachGoal} days from achieving your goal 😍`,
       });
     } catch (e) {
-      snackbar.error({ description: "This is weird but an error occurred 😭" });
+      snackbar.error({
+        description: "This is weird but an error occurred 😭",
+        title: (e as Error)?.message || "Oops! We couldn't catch that",
+      });
     }
   };
 
   const handleUpkeep = async () => {
-    const selectedRows = ((tableRef.current as unknown) as TableInstance<
-      typeof savingsList
-    >)?.getSelectedRowModel().rows;
+    const selectedRows = tableRef.current?.getSelectedRowModel().rows;
     if (selectedRows?.length) {
       const addresses = selectedRows.map((row) => row.getValue("address"));
       const performData = ethers.utils.hexlify(
@@ -281,12 +283,13 @@ const App: NextPage = () => {
                   <Box pt={4} overflowX="scroll">
                     <Button
                       onClick={handleUpkeep}
-                      isDisabled={!savingsList?.length}
+                      isDisabled={!savingsList?.length || !isConnected}
                     >
                       Trigger Upkeep (Fund Savings)
                     </Button>
                     <DataTable
-                      ref={tableRef}
+                      // @ts-expect-error no time to fix this
+                      instanceRef={tableRef}
                       columns={[
                         {
                           header: "#",

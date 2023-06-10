@@ -1,4 +1,5 @@
-import { useContractReads } from "wagmi";
+import { useQuery, useBlockNumber, useChainId } from "wagmi";
+import { readContract } from "@wagmi/core";
 import SavingsGoalData from "@contracts/savings/SavingsGoal.sol/SavingsGoal.json";
 import { SavingsGoal } from "@contract-types/index";
 import { ContractAddress, ContractMeta, ContractResult } from "./types";
@@ -15,30 +16,65 @@ export function useSavings<
   K extends keyof SavingsGoal = keyof SavingsGoal,
   D extends SavingsGoal[K] = SavingsGoal[K]
 >(addresses: ContractAddress[] | undefined, metaList: ContractMeta<K, D>[]) {
-  const { data, ...rest } = useContractReads({
-    // @ts-expect-error We're inferring the type for args
-    contracts: addresses?.flatMap((address) =>
-      metaList.map((meta) => ({
-        ...meta,
-        address,
-        abi: SavingsGoalData.abi as never,
-      }))
-    ),
+  const { data: blockNumber } = useBlockNumber({
+    enabled: true,
+    watch: true,
   });
+  const chainId = useChainId();
 
-  const savingsInfo = addresses?.map(
-    (address, index) =>
-      ({
-        address,
-        ...metaList.reduce(
-          (accMeta, meta, mIndex) => ({
-            ...accMeta,
-            [meta.functionName]: data?.[index + mIndex].result,
-          }),
-          {}
-        ),
-      } as SavingsInfo<typeof metaList[number]["functionName"]>)
+  const { data, ...rest } = useQuery(
+    [
+      {
+        entity: "contracts",
+        contracts:
+          addresses?.flatMap((address) =>
+            metaList.map((meta) => ({
+              ...meta,
+              address,
+              abi: SavingsGoalData.abi,
+            }))
+          ) ?? [],
+        chainId,
+        blockNumber,
+      },
+    ],
+    {
+      queryFn: ({ queryKey: [{ contracts, blockNumber, chainId }] }) => {
+        return Promise.all(
+          contracts.map(async (contract) => ({
+            [contract.functionName]: {
+              value: await readContract({
+                ...contract,
+                blockNumber,
+                chainId,
+              }),
+              address: contract.address,
+            },
+          }))
+        );
+      },
+    }
   );
+
+  const savingsInfo =
+    data &&
+    addresses?.map(
+      (address, index) =>
+        ({
+          address,
+          ...metaList.reduce(
+            (accMeta, meta, mIndex) => ({
+              ...accMeta,
+              [meta.functionName]: data?.find(
+                (d) =>
+                  d[meta.functionName] &&
+                  d[meta.functionName].address === address
+              )?.[meta.functionName].value,
+            }),
+            {}
+          ),
+        } as SavingsInfo<typeof metaList[number]["functionName"]>)
+    );
 
   return { data: savingsInfo, ...rest };
 }
