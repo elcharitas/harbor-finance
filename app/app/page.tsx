@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { NextPage } from "next";
 import {
   useAccount,
@@ -315,13 +315,17 @@ const App: NextPage = () => {
                           accessorKey: "daysToReachGoal",
                         },
                       ]}
-                      data={(savingsList ?? []).map((saving, id) => ({
-                        ...saving,
-                        id: id + 1,
-                        goalAmount: saving.goalAmount.toString(),
-                        daysToReachGoal: saving.daysToReachGoal.toString(),
-                        address: saving.address.slice(0, 6),
-                      }))}
+                      data={useMemo(
+                        () =>
+                          (savingsList ?? []).map((saving, id) => ({
+                            ...saving,
+                            id: id + 1,
+                            goalAmount: saving.goalAmount.toString(),
+                            daysToReachGoal: saving.daysToReachGoal.toString(),
+                            address: saving.address.slice(0, 6),
+                          })),
+                        [savingsList]
+                      )}
                       isSelectable
                     />
                   </Box>
