@@ -73,7 +73,7 @@ const App: NextPage = () => {
   const { data: userSavingsGoals, refetch } = useSavingsFactoryRead<
     ContractAddress[]
   >({
-    functionName: "getAllSavingsGoals",
+    functionName: "getUserSavingsGoals",
   });
   const { isConnected } = useAccount({
     async onConnect() {

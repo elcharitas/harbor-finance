@@ -59,7 +59,7 @@ export function useSavings<
   const savingsInfo =
     data &&
     addresses?.map(
-      (address, index) =>
+      (address) =>
         ({
           address,
           ...metaList.reduce(
