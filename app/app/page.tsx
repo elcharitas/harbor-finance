@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { NextPage } from "next";
 import {
   useAccount,
@@ -46,6 +46,7 @@ import { Section } from "src/components/section";
 import { Feature, Features } from "src/components/features";
 import {
   useSavings,
+  useSavingsWrite,
   useSavingsFactoryRead,
   useSavingsFactoryWrite,
 } from "src/hooks/common";
@@ -80,6 +81,10 @@ const App: NextPage = () => {
     async onConnect() {
       await refetch();
       snackbar.info({ description: "Wallet connected successfully" });
+    },
+    async onDisconnect() {
+      await refetch();
+      snackbar.info({ description: "Wallet disconnected successfully" });
     },
   });
 
@@ -138,6 +143,11 @@ const App: NextPage = () => {
   });
   const { writeAsync: triggerUpkeep } = useSavingsFactoryWrite({
     functionName: "performUpkeep",
+  });
+  const [savingAddress, setSavingAddress] = useState<ContractAddress>();
+  const { writeAsync: withdrawFunds } = useSavingsWrite({
+    functionName: "withdraw",
+    address: savingAddress,
   });
 
   const totalBalance = savingsList?.reduce((total, saving) => {
@@ -199,7 +209,6 @@ const App: NextPage = () => {
     if (selectedRows?.length) {
       const addresses = selectedRows.map((row) => row.getValue("address"));
       const abi = ethers.utils.defaultAbiCoder;
-      console.log({ addresses });
       const performData = abi.encode(["address[]"], [addresses]);
       try {
         await triggerUpkeep({
@@ -211,8 +220,36 @@ const App: NextPage = () => {
           title: (e as Error)?.message || "Oops! We couldn't catch that",
         });
       }
+    } else {
+      snackbar.error({
+        description: "Please select a savings goal to fund",
+      });
     }
   };
+
+  const handleWithdraw = () => {
+    const selectedRows = tableRef.current?.getSelectedRowModel().rows;
+    if (selectedRows?.length) {
+      const addresses = selectedRows.map((row) => row.getValue("address"));
+      addresses.forEach((address) =>
+        setSavingAddress(address as ContractAddress)
+      );
+    } else {
+      snackbar.error({
+        description: "Please select a savings goal to withdraw from",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (savingAddress !== undefined) {
+      withdrawFunds().then(() => {
+        snackbar.success({
+          description: "Funds withdrawn successfully",
+        });
+      });
+    }
+  }, [savingAddress, withdrawFunds, snackbar]);
 
   return (
     <Section p="0">
@@ -275,7 +312,7 @@ const App: NextPage = () => {
               display={{ base: "none", md: "block" }}
               isDisabled
             >
-              Loan
+              Borrow
             </Button>
             <Button
               variant="primary"
@@ -301,6 +338,18 @@ const App: NextPage = () => {
                       isDisabled={!savingsList?.length || !isConnected}
                     >
                       Trigger Upkeep (Fund Savings)
+                    </Button>
+                    <Button
+                      onClick={handleWithdraw}
+                      variant="primary"
+                      isDisabled={
+                        !savingsList?.length ||
+                        !isConnected ||
+                        totalBalance === 0
+                      }
+                      mx={4}
+                    >
+                      Withdraw Funds
                     </Button>
                     <DataTable
                       // @ts-expect-error no time to fix this
@@ -418,7 +467,7 @@ const App: NextPage = () => {
           />
           <Field
             name="goalAmount"
-            label="Amount:"
+            label={`Amount in $${currentToken?.symbol ?? "Dai"} to save:`}
             rules={{ required: "The amount to save is required" }}
             type="number"
           />

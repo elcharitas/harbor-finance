@@ -1,4 +1,4 @@
-import { useQuery, useBlockNumber, useChainId } from "wagmi";
+import { useQuery, useBlockNumber, useChainId, useContractWrite } from "wagmi";
 import { readContract } from "@wagmi/core";
 import SavingsGoalData from "@contracts/savings/SavingsGoal.sol/SavingsGoal.json";
 import { SavingsGoal } from "@contract-types/index";
@@ -77,4 +77,23 @@ export function useSavings<
     );
 
   return { data: savingsInfo, ...rest };
+}
+
+export function useSavingsWrite<
+  R extends ContractResult<D>,
+  K extends keyof SavingsGoal = keyof SavingsGoal,
+  D extends SavingsGoal[K] = SavingsGoal[K]
+>({
+  functionName,
+  args,
+  address,
+}: ContractMeta<K, D> & { address?: ContractAddress }) {
+  const { data, ...rest } = useContractWrite({
+    address,
+    abi: SavingsGoalData.abi,
+    functionName,
+    args,
+  });
+
+  return { data: data as R, ...rest };
 }
