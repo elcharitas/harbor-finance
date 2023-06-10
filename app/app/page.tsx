@@ -248,12 +248,14 @@ const App: NextPage = () => {
           snackbar.success({
             description: "Funds withdrawn successfully",
           });
+          setSavingAddress(undefined);
         })
-        .catch((e) => {
+        .catch(() => {
           snackbar.error({
-            title: (e as Error)?.message || "Oops! We couldn't catch that",
+            title: "Oops! We couldn't catch that",
             description: "Please try again later",
           });
+          setSavingAddress(undefined);
         });
     }
   }, [savingAddress, withdrawFunds, snackbar]);
