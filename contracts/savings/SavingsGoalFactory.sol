@@ -125,7 +125,7 @@ contract SavingsGoalFactory is KeeperCompatibleInterface, Ownable, Pausable {
             "Goal amount has already been reached"
         );
 
-        dai.transferFrom(address(this), goal, amountToAdd);
+        dai.transferFrom(savingsGoal.owner(), goal, amountToAdd);
 
         emit SavingGoalFunded(goal, address(this), amountToAdd);
     }

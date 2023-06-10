@@ -70,11 +70,12 @@ const App: NextPage = () => {
   const { data: tokens } = useSavingsFactoryRead<ContractAddress[]>({
     functionName: "getAllAllowedTokens",
   });
-  const { data: userSavingsGoals, refetch } = useSavingsFactoryRead<
+  const { data: userSavingsGoals, refetch, error } = useSavingsFactoryRead<
     ContractAddress[]
   >({
     functionName: "getUserSavingsGoals",
   });
+  console.log({ userSavingsGoals, error });
   const { isConnected } = useAccount({
     async onConnect() {
       await refetch();
